@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'auth.apps.AuthConfig',
+    'posting.apps.PostingConfig',
 ]
 
 MIDDLEWARE = [
@@ -74,8 +76,10 @@ WSGI_APPLICATION = 'RmsnBlog.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        "NAME" : "blogdb",
+        "USER" : "root",
+        "PASSWORD" : "@Hachimi#",
     }
 }
 
@@ -104,7 +108,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 

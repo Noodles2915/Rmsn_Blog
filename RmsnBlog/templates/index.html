@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>忆昔博客</title>
+	<style>
+		:root{--bg:#f6f7fb;--card:#ffffff;--accent:#2b6cb0;--muted:#6b7280}
+		body{margin:0;font-family:Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;background:var(--bg);color:#111}
+		header{background:linear-gradient(90deg,#fff 0%,#f8fafc 100%);border-bottom:1px solid #e6e9ef;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+		.brand{display:flex;align-items:center;gap:12px}
+		.brand h1{margin:0;font-size:18px}
+		.nav-shortcut{position:relative}
+		.user-shortcut{position:absolute;right:24px;top:16px}
+		.user-link{background:var(--card);border:1px solid #e2e8f0;padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--accent);font-weight:600}
+		main{max-width:980px;margin:28px auto;padding:0 16px}
+		.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+		.card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 1px 2px rgba(16,24,40,0.03);border:1px solid #eef2f7}
+		.card h3{margin:0 0 8px 0;font-size:16px}
+		.meta{font-size:13px;color:var(--muted);margin-bottom:10px}
+		.excerpt{color:#374151;font-size:14px;min-height:44px}
+		.read-more{display:inline-block;margin-top:12px;color:var(--accent);text-decoration:none;font-weight:600}
+		footer{max-width:980px;margin:40px auto;text-align:center;color:var(--muted);font-size:13px}
+		@media (max-width:420px){.user-shortcut{position:static;margin-top:8px}}
+	</style>
+</head>
+<body>
+	<header>
+		<div class="brand">
+			<svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="5" fill="#2b6cb0"/><text x="50%" y="55%" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="12" font-weight="700">RB</text></svg>
+			<h1>Rmsn 博客</h1>
+		</div>
+
+		<div class="nav-shortcut">
+			<!-- 右上角用户捷径：若使用 Django 模板上下文，请使用下面的模板逻辑 -->
+			<!--
+				示例（启用模板渲染）：
+				{% if user.is_authenticated %}
+					<a class="user-link" href="{% url 'auth:profile' %}">个人页 ({{ user.username }})</a>
+				{% else %}
+					<a class="user-link" href="{% url 'auth:login' %}">登录 / 注册</a>
+				{% endif %}
+			-->
+			<!-- 开发时可先使用静态占位链接 -->
+			<a class="user-link" href="/auth/login/">登录 / 注册</a>
+		</div>
+	</header>
+
+	<main>
+		<section>
+			<h2 style="margin:0 0 16px 0">最新文章</h2>
+
+			<div class="grid">
+				<!-- 静态占位卡片：实现后请改用下面注释中的 Django 循环模板接入真实内容 -->
+				<article class="card">
+					<h3>示例文章标题 1</h3>
+					<div class="meta">作者：示例作者 • 刊登日期：2025-01-01</div>
+					<p class="excerpt">这是一段示例摘要。实际内容未实现，发布后请替换为 `post.excerpt` 或 `post.content` 的简短片段。</p>
+					<a class="read-more" href="#">阅读全文 →</a>
+				</article>
+
+				<article class="card">
+					<h3>示例文章标题 2</h3>
+					<div class="meta">作者：示例作者 • 刊登日期：2025-01-01</div>
+					<p class="excerpt">另一段示例摘要。将来可用 `{{ post.get_absolute_url }}` 链接到文章详情页。</p>
+					<a class="read-more" href="#">阅读全文 →</a>
+				</article>
+
+				<article class="card">
+					<h3>示例文章标题 3</h3>
+					<div class="meta">作者：示例作者 • 刊登日期：2025-01-01</div>
+					<p class="excerpt">更多占位内容。下面注释展示如何把真实文章列表接入此模板。</p>
+					<a class="read-more" href="#">阅读全文 →</a>
+				</article>
+
+				<!--
+					动态接入说明：
+					1) 在视图中查询文章并传递到模板上下文，例如：
+						 posts = Post.objects.filter(published=True).order_by('-published_date')[:10]
+						 return render(request, 'index.html', {'posts': posts})
+
+					2) 在模板中启用如下代码替换上面的静态卡片：
+						 {% for post in posts %}
+							 <article class="card">
+								 <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
+								 <div class="meta">作者：{{ post.author.get_full_name|default:post.author.username }} • {{ post.published_date|date:"Y-m-d" }}</div>
+								 <p class="excerpt">{{ post.excerpt|default:post.content|truncatechars:140 }}</p>
+								 <a class="read-more" href="{{ post.get_absolute_url }}">阅读全文 →</a>
+							 </article>
+						 {% empty %}
+							 <p>目前还没有文章。请在后台发布内容或检查视图查询。</p>
+						 {% endfor %}
+
+					3) 若使用分页，请在视图中使用 Django 的 `Paginator`，并在模板下方渲染翻页控件。
+				-->
+
+			</div>
+		</section>
+	</main>
+
+	<footer>
+		<div>© 2025 忆昔博客 • Django 出品</div>
+	</footer>
+</body>
+</html>
+
