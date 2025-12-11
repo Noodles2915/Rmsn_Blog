@@ -16,8 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('user/', include('auth.urls')),
+    # 将 users 应用包含为命名空间，确保模板中使用 'users:...' 可被解析
+    path('user/', include(('users.urls', 'users'), namespace='users')),
+    path('', views.index, name='index'),
 ]
