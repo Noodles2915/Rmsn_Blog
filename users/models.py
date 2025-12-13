@@ -1,25 +1,21 @@
 # 没错，我闲的没事又重新实现了一次用户模型，因为我疯了。
+try:
+    from utils.paths import avatar_upload_path, bg_upload_path
+except Exception:
+    # 如果直接导入失败（例如包路径问题），将项目根目录加入 sys.path 后重试
+    import os
+    import sys
 
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if BASE_DIR not in sys.path:
+        sys.path.insert(0, BASE_DIR)
+
+    from utils.paths import avatar_upload_path, bg_upload_path
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
-import os
 import hashlib
 import uuid
-
-def avatar_upload_path(instance, filename):
-    """头像上传路径生成函数"""
-    ext = filename.split('.')[-1]
-    fname = f"{uuid.uuid4().hex}.{ext}"
-
-    return os.path.join('avatars',str(instance.id), fname)
-
-def bg_upload_path(instance, filename):
-    """背景图片上传路径生成函数"""
-    ext = filename.split('.')[-1]
-    fname = f"{uuid.uuid4().hex}.{ext}"
-
-    return os.path.join('backgrounds',str(instance.id), fname)
 
 class User(models.Model):
     username = models.CharField(max_length=150, unique=True)

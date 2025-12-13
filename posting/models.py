@@ -1,6 +1,7 @@
 from django.db import models
 from markdownx.models import MarkdownxField
 from users.models import User
+from utils.paths import pic_upload_path
 
 # Create your models here.
 

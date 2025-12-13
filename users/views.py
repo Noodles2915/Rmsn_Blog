@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from .models import User, UserSession
 from django.http import JsonResponse, HttpResponse
 from .forms import RegistrationForm, LoginForm, ProfileEditForm
-from .utils.email import send_verification_email
+from utils.email import send_verification_email
 from django.views.decorators.http import require_POST
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError

@@ -2,7 +2,7 @@ from typing import Any
 from django.forms import Form, CharField, EmailField, PasswordInput
 from .models import User
 from django import forms
-from users.utils.email import generate_verification_code as gvc
+from utils.email import generate_verification_code as gvc
 import time
 
 class RegistrationForm(Form):

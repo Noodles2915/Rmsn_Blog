@@ -1,9 +1,9 @@
 
 # RmsnBlog
 
-For English readers：[English](README_EN.md)
+For English readers:[English](README_EN.md)
 
-简体中文说明 — 一个基于 Django 的简单博客示例项目。项目仅依赖 Django 本身。
+简体中文说明 — 一个基于 Django 的简单博客示例项目。项目仅依赖 Django 本身（没有额外第三方包）。
 
 **项目状态**: 教学/示例用途。适合学习 Django 项目结构、用户管理与简单帖子发布。
 
@@ -77,44 +77,3 @@ python manage.py runserver
 - `templates/` — 全局模板文件。
 
 ---
-
-## 邮件（SMTP）配置
-
-本项目的邮箱验证码功能依赖 Django 的邮件发送能力。请在运行前通过环境变量或直接在 `RmsnBlog/settings.py` 中配置下列变量：
-
-- `EMAIL_BACKEND`：开发时可用 `django.core.mail.backends.console.EmailBackend`（将邮件打印到控制台）或 `django.core.mail.backends.smtp.EmailBackend`（真实发送）。
-- `EMAIL_HOST`：SMTP 服务器地址（例如 `smtp.gmail.com`）。
-- `EMAIL_PORT`：SMTP 端口（通常 587 用于 TLS）。
-- `EMAIL_HOST_USER`：发信邮箱用户名（通常为完整邮箱地址）。
-- `EMAIL_HOST_PASSWORD`：发信邮箱密码或应用专用密码。
-- `EMAIL_USE_TLS`：是否使用 TLS（布尔值）。
-
-建议在生产环境通过环境变量设置，上面项目的 `RmsnBlog/settings.py` 已读取这些环境变量。示例（Windows PowerShell 临时设置）：
-
-```powershell
-$env:EMAIL_HOST='smtp.example.com'
-$env:EMAIL_PORT='587'
-$env:EMAIL_HOST_USER='your@domain.com'
-$env:EMAIL_HOST_PASSWORD='your_smtp_password'
-$env:EMAIL_USE_TLS='True'
-```
-
-开发调试提示：
-- 若只是本地开发且不想发送真实邮件，可以把 `EMAIL_BACKEND` 设置为 `django.core.mail.backends.console.EmailBackend`，这样发送的邮件会输出到控制台，便于查看验证码。示例：在 `RmsnBlog/settings.py` 临时修改：
-
-```python
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-```
-
-- 对于 Gmail 等服务，通常需要启用“应用专用密码”或降低安全级别（不推荐）。请参考你所使用邮箱服务商的 SMTP 配置说明。
-
-安全提示：不要在源码中写明明文密码，优先使用环境变量或秘密管理服务。
-
-## 速率限制说明（验证码发送）
-
-项目对邮箱验证码发送做了多层速率限制以防滥用：
-
-- 每个邮箱的验证码有 60 秒冷却（前端/后端均有校验）。
-- 每个 IP 最多每小时允许 10 次发送（服务器端限制，若超过会返回 HTTP 429 并包含 `retry_after` 字段，表示应等待的秒数）。
-
-如果需要更严格或更复杂的限流（例如基于用户、基于账号、或使用 Redis/外部速率限制服务），建议在 `send_verification_code` 处扩展并使用 Redis/缓存层实现全局一致性。
