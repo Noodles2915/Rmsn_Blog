@@ -20,7 +20,7 @@ class PostForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        fields = ['title', 'content', 'tags']
+        fields = ['title', 'content']
 
     def clean_content(self):
         raw = self.cleaned_data.get('content', '')

@@ -4,13 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ post.title }} - 一息博客</title>
+    <link href="https://cdn.jsdelivr.net/npm/simplemde@1.11.2/dist/simplemde.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/simplemde@1.11.2/dist/simplemde.min.js"></script>
+
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         :root {
             --bg: #f6f7fb;
             --card: #ffffff;
@@ -19,14 +22,14 @@
             --muted: #6b7280;
             --border: #e6e9ef;
         }
-        
+
         body {
             font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background: var(--bg);
             color: #111;
             line-height: 1.6;
         }
-        
+
         header {
             background: linear-gradient(90deg, #fff 0%, #f8fafc 100%);
             border-bottom: 1px solid var(--border);
@@ -36,51 +39,51 @@
             justify-content: space-between;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-        
+
         .brand {
             display: flex;
             align-items: center;
             gap: 12px;
         }
-        
+
         .brand h1 {
             font-size: 18px;
             font-weight: 700;
         }
-        
+
         .header-right {
             display: flex;
             align-items: center;
             gap: 16px;
         }
-        
+
         .back-btn {
             color: var(--accent);
             text-decoration: none;
             font-weight: 600;
         }
-        
+
         .back-btn:hover {
             color: var(--accent-hover);
         }
-        
+
         .container {
             max-width: 800px;
             margin: 32px auto;
             padding: 0 24px;
         }
-        
+
         .post-header {
             margin-bottom: 32px;
         }
-        
+
         .post-title {
             font-size: 32px;
             font-weight: 700;
             margin-bottom: 16px;
             color: #111;
         }
-        
+
         .post-meta {
             display: flex;
             align-items: center;
@@ -89,33 +92,33 @@
             color: var(--muted);
             font-size: 14px;
         }
-        
+
         .post-meta-item {
             display: flex;
             align-items: center;
             gap: 4px;
         }
-        
+
         .author-info {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        
+
         .author-avatar {
             width: 36px;
             height: 36px;
             border-radius: 50%;
             object-fit: cover;
         }
-        
+
         .post-tags {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             margin-bottom: 24px;
         }
-        
+
         .tag {
             background: #f0f4f8;
             color: var(--accent);
@@ -124,11 +127,11 @@
             font-size: 13px;
             text-decoration: none;
         }
-        
+
         .tag:hover {
             background: #e8ecf1;
         }
-        
+
         .post-content {
             background: var(--card);
             border: 1px solid var(--border);
@@ -137,30 +140,30 @@
             margin-bottom: 32px;
             box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
         }
-        
+
         .post-content h1,
         .post-content h2,
         .post-content h3 {
             margin-top: 24px;
             margin-bottom: 12px;
         }
-        
+
         .post-content h1 {
             font-size: 28px;
         }
-        
+
         .post-content h2 {
             font-size: 22px;
         }
-        
+
         .post-content h3 {
             font-size: 18px;
         }
-        
+
         .post-content p {
             margin-bottom: 16px;
         }
-        
+
         .post-content pre {
             background: #f5f5f5;
             padding: 12px;
@@ -168,29 +171,29 @@
             overflow-x: auto;
             margin-bottom: 16px;
         }
-        
+
         .post-content code {
             background: #f5f5f5;
             padding: 2px 6px;
             border-radius: 3px;
             font-family: 'Courier New', Courier, monospace;
         }
-        
+
         .post-content pre code {
             background: transparent;
             padding: 0;
         }
-        
+
         .post-content ul,
         .post-content ol {
             margin-left: 24px;
             margin-bottom: 16px;
         }
-        
+
         .post-content li {
             margin-bottom: 8px;
         }
-        
+
         .post-content blockquote {
             border-left: 4px solid var(--accent);
             padding-left: 16px;
@@ -199,7 +202,7 @@
             color: var(--muted);
             font-style: italic;
         }
-        
+
         .post-footer {
             padding-top: 24px;
             border-top: 1px solid var(--border);
@@ -208,12 +211,12 @@
             justify-content: space-between;
             margin-top: 24px;
         }
-        
+
         .post-actions {
             display: flex;
             gap: 12px;
         }
-        
+
         .btn {
             padding: 8px 16px;
             border: 1px solid var(--border);
@@ -225,22 +228,24 @@
             font-weight: 600;
             transition: background 0.2s;
         }
-        
+
         .btn:hover {
             background: #f0f4f8;
         }
-        
+
         .comments-section {
             margin-top: 48px;
             padding-top: 32px;
             border-top: 1px solid var(--border);
         }
-        
+
+        .comment { margin-bottom: 12px }
+
         .comments-section h2 {
             font-size: 20px;
             margin-bottom: 24px;
         }
-        
+
         footer {
             max-width: 800px;
             margin: 40px auto;
@@ -249,21 +254,21 @@
             font-size: 13px;
             padding: 0 24px;
         }
-        
+
         @media (max-width: 640px) {
             .post-title {
                 font-size: 24px;
             }
-            
+
             .post-meta {
                 flex-direction: column;
                 align-items: flex-start;
             }
-            
+
             .post-content {
                 padding: 16px;
             }
-            
+
             .post-footer {
                 flex-direction: column;
                 align-items: flex-start;
@@ -291,56 +296,226 @@
         <article>
             <header class="post-header">
                 <h1 class="post-title">{{ post.title }}</h1>
-                
+
                 <div class="post-meta">
                     <div class="post-meta-item">
                         <div class="author-info">
                             <img src="{{ post.author.avatar_url }}" alt="{{ post.author.username }}" class="author-avatar">
-                            <span>{{ post.author.username }}</span>
+                            <a href="{% url 'users:profile_user' post.author.username %}" style="color: inherit; text-decoration: none;">{{ post.author.username }}</a>
                         </div>
                     </div>
-                    <div class="post-meta-item">
-                        📅 {{ post.created_at|date:"Y-m-d H:i" }}
-                    </div>
-                    {% if post.updated_at != post.created_at %}
                         <div class="post-meta-item">
-                            ✏️ 修改于 {{ post.updated_at|date:"Y-m-d H:i" }}
+                            📅 {{ post.created_at|date:"Y-m-d H:i" }}
                         </div>
-                    {% endif %}
+                        {% if is_updated %}
+                            <div class="post-meta-item">
+                                ✏️ 修改于 {{ post.updated_at|date:"Y-m-d H:i" }}
+                            </div>
+                        {% endif %}
                 </div>
-                
+
                 {% if post.tags.exists %}
                     <div class="post-tags">
                         {% for tag in post.tags.all %}
-                            <a href="#" class="tag">#{{ tag.name }}</a>
+                                <a href="#" class="tag">#{{ tag }}</a>
                         {% endfor %}
                     </div>
                 {% endif %}
             </header>
-            
+
             <div class="post-content">
                 {{ post.content|safe }}
             </div>
-            
+
             <footer class="post-footer">
                 <div>
-                    <small>本文由 <strong>{{ post.author.username }}</strong> 发布</small>
+                    <small>本文由 <a href="{% url 'users:profile_user' post.author.username %}" style="color: var(--accent); text-decoration: none; font-weight: bold;">{{ post.author.username }}</a> 发布</small>
                 </div>
                 <div class="post-actions">
                     <a href="{% url 'index' %}" class="btn">← 返回首页</a>
                 </div>
             </footer>
         </article>
-        
-        <!-- 评论区域（暂未实现） -->
-        <!-- <section class="comments-section">
+
+        <section class="comments-section">
             <h2>评论</h2>
-            <p>评论功能即将推出...</p>
-        </section> -->
+
+            <!-- 新评论表单 -->
+            <div class="card" style="margin-bottom:16px; padding:16px; background:#fff; border:1px solid var(--border); border-radius:8px;">
+                <form method="post" action="{% url 'posting:add_comment' post.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="parent_id" value="">
+                    <div class="form-group">
+                        <label for="comment-content">写下你的评论 (支持 Markdown)</label>
+                        <textarea id="comment-content" name="content" rows="6" style="width:100%; padding:8px; border:1px solid #e6e9ef; border-radius:6px;"></textarea>
+                    </div>
+                    <div style="margin-top:8px; display:flex; gap:8px;">
+                        <button type="submit" class="btn" style="background:var(--accent); color:#fff;">发表评论</button>
+                        <a href="#" class="btn" style="background:#f0f4f8; color:var(--accent);">清空</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 已有评论（显示多级） -->
+            <div id="comments-list">
+                {% if comments %}
+                    {% for comment in comments %}
+                        {% include "_comment.html" with comment=comment offset=0 post=post %}
+                    {% endfor %}
+                {% else %}
+                    <p>还没有评论，快来抢沙发吧。</p>
+                {% endif %}
+            </div>
+        </section>
     </div>
 
     <footer>
         <div>© 2025 一息博客 • Django 出品</div>
     </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            // 初始化主评论编辑器
+            var mainTextarea = document.getElementById('comment-content');
+            var mainEditor = null;
+            if (mainTextarea) {
+                mainEditor = new SimpleMDE({
+                    element: mainTextarea,
+                    spellChecker: false,
+                    placeholder: '在此输入评论，支持 Markdown 格式...'
+                });
+            }
+
+            // 回复按钮：显示对应回复表单并延迟初始化编辑器
+            function bindReplyButtons(root){
+                (root || document).querySelectorAll('.btn-reply').forEach(function(btn){
+                    if (btn.dataset.bound) return;
+                    btn.addEventListener('click', function(e){
+                        e.preventDefault();
+                        var cid = this.getAttribute('data-comment-id');
+                        var container = document.getElementById('reply-form-' + cid);
+                        if (!container) return;
+                        if (container.style.display === 'none' || container.style.display === '') {
+                            container.style.display = 'block';
+                            // 初始化 SimpleMDE 仅一次
+                            if (!container.dataset.inited) {
+                                var ta = container.querySelector('textarea');
+                                if (ta) {
+                                    var inst = new SimpleMDE({ element: ta, spellChecker: false, placeholder: '在此输入回复，支持 Markdown...' });
+                                    // 保存实例到 DOM 节点以便提交时读取
+                                    try { ta.simplemde = inst; } catch (e) {}
+                                }
+                                container.dataset.inited = '1';
+                            }
+                            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        } else {
+                            container.style.display = 'none';
+                        }
+                    });
+                    btn.dataset.bound = '1';
+                });
+            }
+
+            function bindCancelButtons(root){
+                (root || document).querySelectorAll('.btn-cancel-reply').forEach(function(btn){
+                    if (btn.dataset.bound) return;
+                    btn.addEventListener('click', function(){
+                        var cid = this.getAttribute('data-comment-id');
+                        var container = document.getElementById('reply-form-' + cid);
+                        if (container) container.style.display = 'none';
+                    });
+                    btn.dataset.bound = '1';
+                });
+            }
+
+            bindReplyButtons(document);
+            bindCancelButtons(document);
+
+            // 清空主评论
+            var clearLink = document.querySelector('.comments-section .card a');
+            if (clearLink && mainEditor) {
+                clearLink.addEventListener('click', function(e){
+                    e.preventDefault();
+                    mainEditor.value('');
+                });
+            }
+
+            // 表单提交（事件委托）：支持 AJAX 提交并局部插入新评论
+            var commentsSection = document.querySelector('.comments-section');
+            if (commentsSection) {
+                commentsSection.addEventListener('submit', function(e){
+                    var form = e.target;
+                    if (form.tagName.toLowerCase() !== 'form') return;
+                    e.preventDefault();
+
+                    var action = form.getAttribute('action') || window.location.href;
+                    var formData = new FormData(form);
+
+                    // 若表单内有 SimpleMDE 编辑器实例，取其值代替 textarea 的值
+                    var ta = form.querySelector('textarea');
+                    if (ta) {
+                        var val = null;
+                        if (ta.simplemde && typeof ta.simplemde.value === 'function') {
+                            val = ta.simplemde.value();
+                        } else if (ta.id === 'comment-content' && mainEditor) {
+                            val = mainEditor.value();
+                        } else {
+                            val = ta.value;
+                        }
+                        formData.set(ta.name || 'content', val || '');
+                    }
+
+                    fetch(action, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': (document.querySelector('input[name=csrfmiddlewaretoken]')||{}).value || ''
+                        },
+                        body: formData,
+                    }).then(function(res){
+                        return res.json();
+                    }).then(function(data){
+                        if (!data || !data.ok) {
+                            console.error('提交评论失败', data);
+                            return;
+                        }
+
+                        // 插入返回的 HTML
+                        if (data.parent_id) {
+                            var parent = document.getElementById('comment-' + data.parent_id);
+                            if (parent) {
+                                var replies = parent.querySelector('.replies-container');
+                                if (replies) {
+                                    replies.insertAdjacentHTML('beforeend', data.html);
+                                }
+                            }
+                            // 隐藏并清空回复表单
+                            var replyForm = document.getElementById('reply-form-' + data.parent_id);
+                            if (replyForm) {
+                                replyForm.style.display = 'none';
+                                var rta = replyForm.querySelector('textarea');
+                                if (rta) {
+                                    if (rta.simplemde && typeof rta.simplemde.value === 'function') rta.simplemde.value('');
+                                    else rta.value = '';
+                                }
+                            }
+                        } else {
+                            // 顶层评论，插入到 comments-list 顶部
+                            var list = document.getElementById('comments-list');
+                            if (list) list.insertAdjacentHTML('afterbegin', data.html);
+                            // 清空主编辑器
+                            if (mainEditor) mainEditor.value('');
+                        }
+
+                        // 绑定新插入部分的按钮
+                        var containerRoot = document.getElementById('comment-' + (data.comment_id || '')) || document;
+                        bindReplyButtons(containerRoot);
+                        bindCancelButtons(containerRoot);
+                    }).catch(function(err){
+                        console.error('AJAX 错误', err);
+                    });
+                });
+            }
+        });
+    </script>
 </body>
 </html>

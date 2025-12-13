@@ -45,55 +45,24 @@
             <h2 style="margin:0 0 16px 0">最新文章</h2>
 
             <div class="grid">
-                <!-- 静态占位卡片：实现后请改用下面注释中的 Django 循环模板接入真实内容 -->
-                <article class="card">
-                    <h3>示例文章标题 1</h3>
-                    <div class="meta">作者：示例作者 • 刊登日期：2025-01-01</div>
-                    <p class="excerpt">这是一段示例摘要。实际内容未实现，发布后请替换为 `post.excerpt` 或 `post.content` 的简短片段。</p>
-                    <a class="read-more" href="#">阅读全文 →</a>
-                </article>
-
-                <article class="card">
-                    <h3>示例文章标题 2</h3>
-                    <div class="meta">作者：示例作者 • 刊登日期：2025-01-01</div>
-                    <p class="excerpt">另一段示例摘要。将来可用 `{{ post.get_absolute_url }}` 链接到文章详情页。</p>
-                    <a class="read-more" href="#">阅读全文 →</a>
-                </article>
-
-                <article class="card">
-                    <h3>示例文章标题 3</h3>
-                    <div class="meta">作者：示例作者 • 刊登日期：2025-01-01</div>
-                    <p class="excerpt">更多占位内容。下面注释展示如何把真实文章列表接入此模板。</p>
-                    <a class="read-more" href="#">阅读全文 →</a>
-                </article>
-
-                <!--
-                    动态接入说明：
-                    1) 在视图中查询文章并传递到模板上下文，例如：
-                         posts = Post.objects.filter(published=True).order_by('-published_date')[:10]
-                         return render(request, 'index.html', {'posts': posts})
-
-                    2) 在模板中启用如下代码替换上面的静态卡片：
-                         {% for post in posts %}
-                           <article class="card">
-                             <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
-                             <div class="meta">作者：{{ post.usersor.get_full_name|default:post.usersor.username }} • {{ post.published_date|date:"Y-m-d" }}</div>
-                             <p class="excerpt">{{ post.excerpt|default:post.content|truncatechars:140 }}</p>
-                             <a class="read-more" href="{{ post.get_absolute_url }}">阅读全文 →</a>
-                           </article>
-                         {% empty %}
-                           <p>目前还没有文章。请在后台发布内容或检查视图查询。</p>
-                         {% endfor %}
-
-                    3) 若使用分页，请在视图中使用 Django 的 `Paginator`，并在模板下方渲染翻页控件。
-                -->
-
+                {% if posts %}
+                    {% for post in posts %}
+                        <article class="card">
+                            <h3><a href="{{ post.url }}">{{ post.title }}</a></h3>
+                            <div class="meta">作者：<a href="{% url 'users:profile_user' post.author_username %}" style="color: var(--accent); text-decoration: none;">{{ post.author }}</a> • {{ post.created_at|date:"Y-m-d" }}</div>
+                            <p class="excerpt">{{ post.excerpt }}</p>
+                            <a class="read-more" href="{{ post.url }}">阅读全文 →</a>
+                        </article>
+                    {% endfor %}
+                {% else %}
+                    <p>目前还没有文章。请在后台发布内容或检查视图查询。</p>
+                {% endif %}
             </div>
         </section>
     </main>
 
     <footer>
-        <div>© 2025 忆昔博客 • Django 出品</div>
+        <div>© 2025 一息博客 • Django 出品</div>
     </footer>
 </body>
 </html>

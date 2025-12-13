@@ -114,11 +114,16 @@ def dashboard(request):
         return redirect('login')
     
     # 获取用户发布的文章统计
-    from posting.models import Post
+    from posting.models import Post, Comment
+    from django.db.models import Sum
+    
     user_posts = Post.objects.filter(author=user).order_by('-created_at')[:5]
     posts_count = Post.objects.filter(author=user).count()
-    comments_count = 0  # 后续可以扩展
-    views_count = 0  # 后续可以扩展
+    # 计算该用户所有文章收到的评论总数
+    user_post_ids = Post.objects.filter(author=user).values_list('id', flat=True)
+    comments_count = Comment.objects.filter(post_id__in=user_post_ids).count()
+    # 计算该用户所有文章的浏览量总和
+    views_count = Post.objects.filter(author=user).aggregate(total=Sum('views_count'))['total'] or 0
     
     context = {
         'user': user,
@@ -129,19 +134,37 @@ def dashboard(request):
     }
     return render(request, 'dashboard.html', context)
 
-def profile(request):
-    user = get_current_user(request)
-    if not user:
-        return redirect('login')
+def profile(request, username=None):
+    current_user = get_current_user(request)
     
-    # 获取用户统计信息
-    from posting.models import Post
-    posts_count = Post.objects.filter(author=user).count()
-    comments_count = 0  # 后续可以扩展
-    views_count = 0  # 后续可以扩展
+    # 如果提供了 username 参数，显示该用户的资料；否则显示当前登录用户的资料
+    if username:
+        from django.shortcuts import get_object_or_404
+        profile_user = get_object_or_404(User, username=username)
+    else:
+        # 访问 /profile/ 时显示当前用户自己的资料
+        if not current_user:
+            return redirect('users:login')
+        profile_user = current_user
+    
+    # 获取该用户的统计信息
+    from posting.models import Post, Comment
+    from django.db.models import Sum
+    
+    posts_count = Post.objects.filter(author=profile_user).count()
+    # 计算该用户所有文章收到的评论总数
+    user_post_ids = Post.objects.filter(author=profile_user).values_list('id', flat=True)
+    comments_count = Comment.objects.filter(post_id__in=user_post_ids).count()
+    # 计算该用户所有文章的浏览量总和
+    views_count = Post.objects.filter(author=profile_user).aggregate(total=Sum('views_count'))['total'] or 0
+    
+    # 判断是否是当前用户自己的页面
+    is_own_profile = current_user and current_user.id == profile_user.id
     
     context = {
-        'user': user,
+        'user': profile_user,
+        'current_user': current_user,
+        'is_own_profile': is_own_profile,
         'posts_count': posts_count,
         'comments_count': comments_count,
         'views_count': views_count,

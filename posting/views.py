@@ -6,6 +6,9 @@ from .models import Post, Tag, Comment
 from .forms import PostForm, CommentForm, ALLOWED_TAGS, ALLOWED_ATTRIBUTES
 from markdownx.utils import markdownify
 import bleach
+import json
+from django.utils.html import strip_tags
+from django.utils.text import Truncator
 
 
 def new_post(request):
@@ -24,13 +27,26 @@ def new_post(request):
             post.content = cleaned
             post.author = user
             post.save()
-            form.save_m2m()
+            # 解析并创建/关联自定义标签（前端通过隐藏字段提交逗号分隔的标签名）
+            tags_raw = request.POST.get('tags', '')
+            if tags_raw:
+                tag_names = [t.strip() for t in tags_raw.split(',') if t.strip()]
+                tag_objs = []
+                for name in tag_names:
+                    tag_obj, _ = Tag.objects.get_or_create(name=name)
+                    tag_objs.append(tag_obj)
+                post.tags.set(tag_objs)
+            else:
+                post.tags.clear()
             return redirect('users:dashboard')
         else:
-            return render(request, 'new_post.html', {'form': form})
+            # 将前端 tags 回显数据也交给模板（视图负责准备初始标签数据）
+            tags_raw = request.POST.get('tags', '')
+            tags_list = [t.strip() for t in tags_raw.split(',') if t.strip()]
+            return render(request, 'new_post.html', {'form': form, 'initial_tags_json': json.dumps(tags_list)})
 
     form = PostForm()
-    return render(request, 'new_post.html', {'form': form})
+    return render(request, 'new_post.html', {'form': form, 'initial_tags_json': json.dumps([])})
 
 def edit_post(request, post_id):
     """编辑文章"""
@@ -52,14 +68,29 @@ def edit_post(request, post_id):
             cleaned = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
             post.content = cleaned
             post.save()
-            form.save_m2m()
+            # 更新标签
+            tags_raw = request.POST.get('tags', '')
+            if tags_raw:
+                tag_names = [t.strip() for t in tags_raw.split(',') if t.strip()]
+                tag_objs = []
+                for name in tag_names:
+                    tag_obj, _ = Tag.objects.get_or_create(name=name)
+                    tag_objs.append(tag_obj)
+                post.tags.set(tag_objs)
+            else:
+                post.tags.clear()
             return redirect('users:dashboard')
         else:
-            return render(request, 'edit_post.html', {'post': post, 'form': form})
+            tags_raw = request.POST.get('tags', '')
+            tags_list = [t.strip() for t in tags_raw.split(',') if t.strip()]
+            return render(request, 'edit_post.html', {'post': post, 'form': form, 'initial_tags_json': json.dumps(tags_list)})
     
+    # 预构建初始标签数据，以便模板不需要进行复杂的 tags 拼接
+    initial_tags = [t.name for t in post.tags.all()]
     context = {
         'post': post,
-        'form': None,
+        'form': PostForm(instance=post),
+        'initial_tags_json': json.dumps(initial_tags),
     }
     return render(request, 'edit_post.html', context)
 
@@ -67,9 +98,22 @@ def view_post(request, post_id):
     """查看文章详情"""
     post = get_object_or_404(Post, id=post_id)
     
+    # 增加浏览量计数
+    post.views_count += 1
+    post.save(update_fields=['views_count'])
+    
+    # 将标签列表与是否有更新之类的轻量信息在视图中计算好，简化模板判断
+    tags = list(post.tags.values_list('name', flat=True))
+    is_updated = post.updated_at != post.created_at
+
+    # 评论与文章为独立模型时，不应依赖反向属性，改为直接查询 Comment
+    comments = Comment.objects.filter(post=post, level=0).order_by('-created_at').prefetch_related('replies')
+
     context = {
         'post': post,
-        'comments': post.comments.filter(level=0).order_by('-created_at'),
+        'comments': comments,
+        'tags': tags,
+        'is_updated': is_updated,
     }
     return render(request, 'post_detail.html', context)
 
@@ -138,3 +182,15 @@ def delete_post(request, post_id):
     
     # GET 请求显示确认页面
     return render(request, 'delete_post_confirm.html', {'post': post})
+
+
+def tags_autocomplete(request):
+    """返回与查询 q 匹配的标签名列表（JSON），用于前端自动完成建议。"""
+    q = request.GET.get('q', '').strip()
+    results = []
+    if q:
+        qs = Tag.objects.filter(name__icontains=q).order_by('name')[:20]
+    else:
+        qs = Tag.objects.all().order_by('name')[:20]
+    results = [t.name for t in qs]
+    return JsonResponse({'ok': True, 'results': results})

@@ -12,7 +12,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         :root {
             --bg: #f6f7fb;
             --card: #ffffff;
@@ -22,13 +22,13 @@
             --danger: #ef4444;
             --border: #e6e9ef;
         }
-        
+
         body {
             font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background: var(--bg);
             color: #111;
         }
-        
+
         header {
             background: linear-gradient(90deg, #fff 0%, #f8fafc 100%);
             border-bottom: 1px solid var(--border);
@@ -38,40 +38,40 @@
             justify-content: space-between;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-        
+
         .brand {
             display: flex;
             align-items: center;
             gap: 12px;
         }
-        
+
         .brand h1 {
             font-size: 18px;
             font-weight: 700;
         }
-        
+
         .header-right {
             display: flex;
             align-items: center;
             gap: 16px;
         }
-        
+
         .back-btn {
             color: var(--accent);
             text-decoration: none;
             font-weight: 600;
         }
-        
+
         .back-btn:hover {
             color: var(--accent-hover);
         }
-        
+
         .container {
             max-width: 1000px;
             margin: 24px auto;
             padding: 0 24px;
         }
-        
+
         .card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -79,7 +79,7 @@
             box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
             overflow: hidden;
         }
-        
+
         .card-header {
             padding: 20px;
             border-bottom: 1px solid var(--border);
@@ -88,27 +88,27 @@
             align-items: center;
             justify-content: space-between;
         }
-        
+
         .card-header h2 {
             font-size: 18px;
             margin: 0;
         }
-        
+
         .card-body {
             padding: 24px;
         }
-        
+
         .form-group {
             margin-bottom: 20px;
         }
-        
+
         .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
             font-size: 14px;
         }
-        
+
         .form-group input,
         .form-group textarea,
         .form-group select {
@@ -120,7 +120,7 @@
             font-size: 14px;
             transition: border-color 0.2s;
         }
-        
+
         .form-group input:focus,
         .form-group textarea:focus,
         .form-group select:focus {
@@ -128,17 +128,17 @@
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
         }
-        
+
         .form-group.editor-group {
             margin-bottom: 24px;
         }
-        
+
         .editor-group .CodeMirror {
             border: 1px solid var(--border);
             border-radius: 6px;
             min-height: 400px;
         }
-        
+
         .tags-input-container {
             display: flex;
             flex-wrap: wrap;
@@ -149,7 +149,7 @@
             min-height: 40px;
             align-items: center;
         }
-        
+
         .tag {
             background: var(--accent);
             color: #fff;
@@ -160,12 +160,12 @@
             gap: 6px;
             font-size: 13px;
         }
-        
+
         .tag-remove {
             cursor: pointer;
             font-weight: bold;
         }
-        
+
         .tags-input-container input {
             border: none;
             padding: 0;
@@ -173,29 +173,29 @@
             min-width: 100px;
             font-size: 14px;
         }
-        
+
         .tags-input-container input:focus {
             outline: none;
             box-shadow: none;
         }
-        
+
         .help-text {
             font-size: 12px;
             color: var(--muted);
             margin-top: 6px;
         }
-        
+
         .error-list {
             color: var(--danger);
             font-size: 12px;
             margin-top: 6px;
             list-style: none;
         }
-        
+
         .error-list li {
             margin-bottom: 4px;
         }
-        
+
         .form-actions {
             display: flex;
             gap: 12px;
@@ -203,7 +203,7 @@
             padding-top: 20px;
             border-top: 1px solid var(--border);
         }
-        
+
         .btn {
             padding: 10px 20px;
             border: none;
@@ -215,52 +215,52 @@
             transition: all 0.2s;
             font-size: 14px;
         }
-        
+
         .btn-primary {
             background: var(--accent);
             color: #fff;
             flex: 1;
         }
-        
+
         .btn-primary:hover {
             background: var(--accent-hover);
         }
-        
+
         .btn-secondary {
             background: #f0f4f8;
             color: var(--accent);
             border: 1px solid var(--border);
         }
-        
+
         .btn-secondary:hover {
             background: #e8ecf1;
         }
-        
+
         .form-section {
             margin-bottom: 24px;
             padding-bottom: 24px;
             border-bottom: 1px solid var(--border);
         }
-        
+
         .form-section:last-of-type {
             border-bottom: none;
             margin-bottom: 0;
             padding-bottom: 0;
         }
-        
+
         .form-section-title {
             font-size: 16px;
             font-weight: 700;
             margin-bottom: 16px;
             color: #111;
         }
-        
+
         .two-column {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px;
         }
-        
+
         footer {
             max-width: 1000px;
             margin: 40px auto;
@@ -269,16 +269,16 @@
             font-size: 13px;
             padding: 0 24px;
         }
-        
+
         @media (max-width: 640px) {
             .form-actions {
                 flex-direction: column;
             }
-            
+
             .btn {
                 width: 100%;
             }
-            
+
             .two-column {
                 grid-template-columns: 1fr;
             }
@@ -305,14 +305,14 @@
             <div class="card-header">
                 <h2>✏️ 发布新文章</h2>
             </div>
-            
+
             <form method="post" class="card-body">
                 {% csrf_token %}
-                
+
                 <!-- 基本信息部分 -->
                 <div class="form-section">
                     <div class="form-section-title">文章信息</div>
-                    
+
                     <div class="form-group">
                         <label for="title">文章标题 *</label>
                         {% if form.title %}
@@ -328,7 +328,7 @@
                             <input type="text" id="title" name="title" placeholder="请输入文章标题" required>
                         {% endif %}
                     </div>
-                    
+
                     <div class="two-column">
                         <div class="form-group">
                             <label for="tags">标签</label>
@@ -336,7 +336,7 @@
                                 <div class="tags-input-container">
                                     <input type="text" id="tags-input" placeholder="输入标签后按回车">
                                 </div>
-                                <input type="hidden" id="tags" name="tags">
+                                <input type="hidden" id="tags" name="tags" value="{{ form.data.tags|default:'' }}">
                                 {% if form.tags.errors %}
                                     <ul class="error-list">
                                         {% for error in form.tags.errors %}
@@ -351,7 +351,7 @@
                             {% endif %}
                             <div class="help-text">按回车添加标签，点击标签可删除</div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="status">发布状态</label>
                             <select id="status" name="status">
@@ -361,11 +361,11 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- 内容部分 -->
                 <div class="form-section">
                     <div class="form-section-title">文章内容</div>
-                    
+
                     <div class="form-group editor-group">
                         <label for="content">文章内容 * (Markdown 格式)</label>
                         {% if form.content %}
@@ -382,7 +382,7 @@
                         {% endif %}
                     </div>
                 </div>
-                
+
                 <!-- 操作按钮 -->
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary" name="action" value="publish">发布文章</button>
@@ -412,11 +412,16 @@
             ]
         });
 
-        // 标签管理
+        // 标签管理（初始标签由视图通过 `initial_tags_json` 提供）
         const tagsContainer = document.querySelector('.tags-input-container');
         const tagsInput = document.getElementById('tags-input');
         const tagsHidden = document.getElementById('tags');
-        let tags = [];
+        let tags = {{ initial_tags_json|safe }} || [];
+
+        // 若隐藏字段已有值（例如表单回显），优先使用隐藏字段
+        if (tagsHidden && tagsHidden.value) {
+            tags = tagsHidden.value.split(',').map(t => t.trim()).filter(Boolean);
+        }
 
         if (tagsInput) {
             tagsInput.addEventListener('keypress', (e) => {
@@ -440,7 +445,7 @@
                     <span class="tag-remove" onclick="removeTag('${tag}')">×</span>
                 </div>
             `).join('');
-            
+
             tagsContainer.innerHTML = tagElements + '<input type="text" id="tags-input" placeholder="输入标签后按回车">';
             document.getElementById('tags-input').addEventListener('keypress', handleTagInput);
         }
@@ -457,6 +462,10 @@
             }
         }
 
+        // 首次渲染后同步隐藏字段
+        renderTags();
+        updateTagsHidden();
+
         function handleTagInput(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -468,6 +477,69 @@
                 }
             }
         }
+
+        // 简单的自动完成建议（向后端请求匹配标签）
+        function showSuggestions(list) {
+            // 移除已有建议容器
+            let existing = document.getElementById('tags-suggestions');
+            if (existing) existing.remove();
+            if (!list || !list.length) return;
+            const box = document.createElement('div');
+            box.id = 'tags-suggestions';
+            box.style.position = 'absolute';
+            box.style.background = '#fff';
+            box.style.border = '1px solid #e6e9ef';
+            box.style.padding = '6px';
+            box.style.borderRadius = '6px';
+            box.style.zIndex = 1000;
+            list.forEach(function(item){
+                const el = document.createElement('div');
+                el.style.padding = '4px 8px';
+                el.style.cursor = 'pointer';
+                el.textContent = item;
+                el.addEventListener('click', function(){
+                    if (!tags.includes(item)) tags.push(item);
+                    renderTags();
+                    updateTagsHidden();
+                    box.remove();
+                });
+                box.appendChild(el);
+            });
+            // 将 box 放在 input 旁边
+            const rect = tagsInput.getBoundingClientRect();
+            box.style.left = (rect.left + window.scrollX) + 'px';
+            box.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+            document.body.appendChild(box);
+        }
+
+        function fetchSuggestions(q) {
+            if (!q) { showSuggestions([]); return; }
+            fetch(`/posting/tags/autocomplete/?q=${encodeURIComponent(q)}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.ok) showSuggestions(data.results.filter(r=>!tags.includes(r)));
+                }).catch(()=>{});
+        }
+
+        // 防抖函数，避免短时间内频繁请求
+        function debounce(fn, wait) {
+            let t = null;
+            return function(...args) {
+                clearTimeout(t);
+                t = setTimeout(() => fn.apply(this, args), wait);
+            };
+        }
+
+        const debouncedFetch = debounce(fetchSuggestions, 250);
+
+        // 绑定输入事件以触发建议（使用防抖）
+        document.addEventListener('input', function(e){
+            const target = e.target;
+            if (target && target.id === 'tags-input') {
+                const q = target.value.trim();
+                debouncedFetch(q);
+            }
+        });
     </script>
 </body>
 </html>

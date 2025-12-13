@@ -1,229 +1,37 @@
-<!doctype html>
-<html lang="zh-cn">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>确认删除 - 一息博客</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        :root {
-            --bg: #f6f7fb;
-            --card: #ffffff;
-            --accent: #2b6cb0;
-            --accent-hover: #1e4f7a;
-            --muted: #6b7280;
-            --danger: #ef4444;
-            --border: #e6e9ef;
-        }
-        
-        body {
-            font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: var(--bg);
-            color: #111;
-        }
-        
-        header {
-            background: linear-gradient(90deg, #fff 0%, #f8fafc 100%);
-            border-bottom: 1px solid var(--border);
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-        
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .brand h1 {
-            font-size: 18px;
-            font-weight: 700;
-        }
-        
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        
-        .back-btn {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 600;
-        }
-        
-        .back-btn:hover {
-            color: var(--accent-hover);
-        }
-        
-        .container {
-            max-width: 600px;
-            margin: 60px auto;
-            padding: 0 24px;
-        }
-        
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
-            overflow: hidden;
-        }
-        
-        .card-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
-            background: #f9fafb;
-        }
-        
-        .card-header h2 {
-            font-size: 18px;
-            margin: 0;
-            color: var(--danger);
-        }
-        
-        .card-body {
-            padding: 32px;
-            text-align: center;
-        }
-        
-        .warning-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-        
-        .card-body h3 {
-            font-size: 20px;
-            margin-bottom: 12px;
-        }
-        
-        .card-body p {
-            color: var(--muted);
-            margin-bottom: 12px;
-            line-height: 1.6;
-        }
-        
-        .post-info {
-            background: #f9fafb;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-            margin: 24px 0;
-            text-align: left;
-        }
-        
-        .post-info strong {
-            display: block;
-            color: #111;
-            margin-bottom: 8px;
-        }
-        
-        .post-info small {
-            color: var(--muted);
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 28px;
-            padding-top: 24px;
-            border-top: 1px solid var(--border);
-        }
-        
-        .btn {
-            flex: 1;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-        
-        .btn-danger {
-            background: var(--danger);
-            color: #fff;
-        }
-        
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-        
-        .btn-secondary {
-            background: #f0f4f8;
-            color: var(--accent);
-            border: 1px solid var(--border);
-        }
-        
-        .btn-secondary:hover {
-            background: #e8ecf1;
-        }
-        
-        footer {
-            max-width: 600px;
-            margin: 40px auto;
-            text-align: center;
-            color: var(--muted);
-            font-size: 13px;
-            padding: 0 24px;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="brand">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="24" height="24" rx="5" fill="#2b6cb0"/>
-                <text x="50%" y="55%" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="12" font-weight="700">RB</text>
-            </svg>
-            <h1>一息博客</h1>
-        </div>
+{% extends "base.html" %}
 
-        <div class="header-right">
-            <a href="{% url 'users:dashboard' %}" class="back-btn">← 返回仪表盘</a>
-        </div>
-    </header>
+{% block title %}确认删除 - 一息博客{% endblock %}
 
+{% block head %}
+<style>
+    :root{--bg:#f6f7fb;--card:#ffffff;--accent:#2b6cb0;--muted:#6b7280;--danger:#ef4444;--border:#e6e9ef}
+    .container{max-width:600px;margin:60px auto;padding:0 24px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+    .card-header{padding:20px;border-bottom:1px solid var(--border);background:#f9fafb}
+    .card-header h2{font-size:18px;margin:0;color:var(--danger)}
+    .card-body{padding:32px;text-align:center}
+    .warning-icon{font-size:48px;margin-bottom:16px}
+    .post-info{background:#f9fafb;border:1px solid var(--border);border-radius:8px;padding:16px;margin:24px 0;text-align:left}
+    .form-actions{display:flex;gap:12px;margin-top:28px;padding-top:24px;border-top:1px solid var(--border)}
+    .btn{flex:1;padding:10px 20px;border-radius:6px}
+    .btn-danger{background:var(--danger);color:#fff}
+    .btn-secondary{background:#f0f4f8;color:var(--accent);border:1px solid var(--border)}
+</style>
+{% endblock %}
+
+{% block content %}
     <div class="container">
         <div class="card">
-            <div class="card-header">
-                <h2>⚠️ 确认删除文章</h2>
-            </div>
-            
+            <div class="card-header"><h2>⚠️ 确认删除文章</h2></div>
             <div class="card-body">
                 <div class="warning-icon">⚠️</div>
                 <h3>你确定要删除这篇文章吗？</h3>
                 <p>此操作无法撤销。删除后，文章及相关评论将永久移除。</p>
-                
-                <div class="post-info">
-                    <strong>{{ post.title }}</strong>
-                    <small>发布于 {{ post.created_at|date:"Y-m-d H:i" }}</small>
-                </div>
-                
-                <form method="post" style="display: inline-block; width: 100%;">
-                    {% csrf_token %}
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-danger">删除文章</button>
-                        <a href="{% url 'users:dashboard' %}" class="btn btn-secondary">取消</a>
-                    </div>
-                </form>
+                <div class="post-info"><strong>{{ post.title }}</strong><small>发布于 {{ post.created_at|date:"Y-m-d H:i" }}</small></div>
+                <form method="post" style="display:inline-block;width:100%;">{% csrf_token %}<div class="form-actions"><button type="submit" class="btn btn-danger">删除文章</button><a href="{% url 'users:dashboard' %}" class="btn btn-secondary">取消</a></div></form>
             </div>
         </div>
     </div>
+{% endblock %}
 
-    <footer>
-        <div>© 2025 一息博客 • Django 出品</div>
-    </footer>
-</body>
-</html>
+{% block scripts %}{% endblock %}
