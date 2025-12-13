@@ -73,6 +73,17 @@ Repository file index (quick reference):
 - `users/` — user app (forms, views, urls).
 - `templates/` — global templates.
 
+For Chinese readers, see: [readme.md](readme.md)
+
+## Rate limiting (verification emails)
+
+The project applies multi-layer rate limiting for verification email requests to mitigate abuse:
+
+- Per-email cooldown: 60 seconds (checked on client and server).
+- Per-IP limit: default 10 sends per hour (server-side). When exceeded the endpoint returns HTTP 429 and a `retry_after` field indicating seconds to wait.
+
+If you need stronger or distributed rate limiting (e.g. Redis-backed counters or external rate-limit services), extend `send_verification_code` to use a shared cache or Redis.
+
 If you want, I can also:
 - Pin exact package versions in `requirements.txt` for reproducible installs,
 - Add a `Dockerfile` and `docker-compose.yml` for local development,

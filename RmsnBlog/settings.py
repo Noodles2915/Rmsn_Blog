@@ -16,6 +16,13 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# 存放媒体文件.
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# 媒体文件上传要求
+FILE_MAX_SIZE = 5 * 1024 * 1024  # 5 MB
+ALLOWED_FILE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif']
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -38,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'markdownx',
     'users.apps.UsersConfig',
     'posting.apps.PostingConfig',
 ]

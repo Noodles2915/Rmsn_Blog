@@ -32,8 +32,8 @@
         </div>
 
         <div class="nav-shortcut">
-                {% if user.get_current_user %}
-                    <a class="user-link" href="{% url 'users:profile' %}">个人页 ({{ user.username }})</a>
+                {% if user %}
+                    <a class="user-link" href="{% url 'users:dashboard' %}">个人页 ({{ user.username }})</a>
                 {% else %}
                     <a class="user-link" href="{% url 'users:login' %}">登录 / 注册</a>
                 {% endif %}

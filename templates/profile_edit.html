@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>编辑个人信息 - 一息博客</title>
+    <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg: #f6f7fb;
+            --card: #ffffff;
+            --accent: #2b6cb0;
+            --accent-hover: #1e4f7a;
+            --muted: #6b7280;
+            --danger: #ef4444;
+            --border: #e6e9ef;
+        }
+        
+        body {
+            font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: #111;
+        }
+        
+        header {
+            background: linear-gradient(90deg, #fff 0%, #f8fafc 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .brand h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+        }
+        
+        .back-btn {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .back-btn:hover {
+            color: var(--accent-hover);
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+        
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            background: #f9fafb;
+        }
+        
+        .card-header h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+        
+        .card-body {
+            padding: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .form-group.file-input {
+            position: relative;
+        }
+        
+        .file-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .avatar-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+        }
+        
+        .file-input input[type="file"],
+        .file-input .clearable-file-input {
+            display: none !important;
+        }
+        
+        .file-input label {
+            margin: 0;
+            padding: 8px 16px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+            display: inline-block;
+        }
+        
+        .file-input label:hover {
+            background: var(--accent-hover);
+        }
+        
+        .custom-clear-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            margin-left: 2px;
+        }
+        
+        .custom-clear-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--danger);
+            margin: 0;
+        }
+        
+        .custom-clear-checkbox label {
+            font-size: 13px;
+            color: var(--muted);
+            cursor: pointer;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+        
+        .error-list {
+            color: var(--danger);
+            font-size: 12px;
+            margin-top: 6px;
+            list-style: none;
+        }
+        
+        .error-list li {
+            margin-bottom: 4px;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            flex: 1;
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+        
+        .btn-secondary {
+            background: #f0f4f8;
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: #e8ecf1;
+        }
+        
+        .form-section {
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .form-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .form-section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #111;
+        }
+        
+        footer {
+            max-width: 800px;
+            margin: 40px auto;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+            padding: 0 24px;
+        }
+        
+        @media (max-width: 640px) {
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .file-input-wrapper {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="24" height="24" rx="5" fill="#2b6cb0"/>
+                <text x="50%" y="55%" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="12" font-weight="700">RB</text>
+            </svg>
+            <h1>一息博客</h1>
+        </div>
+
+        <div class="header-right">
+            <a href="{% url 'users:profile' %}" class="back-btn">← 返回个人页</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2>编辑个人信息</h2>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data" class="card-body">
+                {% csrf_token %}
+                
+                <!-- 基本信息部分 -->
+                <div class="form-section">
+                    <div class="form-section-title">基本信息</div>
+                    
+                    <div class="form-group">
+                        <label for="username">用户名</label>
+                        <input type="text" id="username" value="{{ user.username }}" disabled>
+                        <div class="help-text">用户名无法修改</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">邮箱地址</label>
+                        {% if form.email %}
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <ul class="error-list">
+                                    {% for error in form.email.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        {% else %}
+                            <input type="email" id="email" value="{{ user.email }}" readonly>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- 头像部分 -->
+                <div class="form-section">
+                    <div class="form-section-title">头像</div>
+                    <div class="form-group file-input">
+                        <div class="file-input-wrapper">
+                            <img id="avatar-preview" src="{{ user.avatar_url }}" alt="{{ user.username }}" class="avatar-preview">
+                            <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;">
+                                <label for="id_avatar" class="btn btn-primary" style="padding:8px 12px;border-radius:6px;">选择新头像</label>
+                                {% if user.avatar %}
+                                <label class="custom-clear-checkbox" for="id_avatar-clear" style="margin-top:0;">
+                                    <input type="checkbox" name="{{ form.avatar.name }}-clear" id="id_avatar-clear">
+                                    <span>清除头像</span>
+                                </label>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <!-- 手动渲染文件输入，避免 Django 默认显示真实文件路径/Currently/Change 文本 -->
+                        <input type="file" name="{{ form.avatar.name }}" id="id_avatar" accept="image/*" style="display:none;">
+                        <div class="help-text">支持 JPG、PNG 格式，大小不超过 5MB。可裁剪后保存。</div>
+                        {% if form.avatar.errors %}
+                            <ul class="error-list">
+                                {% for error in form.avatar.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <div id="cropper-modal" style="display:none;position:fixed;z-index:9999;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;">
+                            <div style="background:#fff;padding:24px;border-radius:12px;max-width:90vw;max-height:90vh;">
+                                <img id="cropper-image" style="max-width:400px;max-height:400px;display:block;margin:auto;">
+                                <div style="text-align:center;margin-top:16px;">
+                                    <button type="button" id="crop-confirm" class="btn btn-primary">裁剪并预览</button>
+                                    <button type="button" id="crop-cancel" class="btn btn-secondary">取消</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 背景部分 -->
+                <div class="form-section">
+                    <div class="form-section-title">个人背景</div>
+                    <div class="form-group file-input">
+                        <div class="file-input-wrapper">
+                            <div id="bg-preview" style="width:240px;height:100px;border-radius:8px;border:2px solid var(--border);background: {{ user.bg_css|safe }};"></div>
+                            <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;">
+                                <label for="id_bg" class="btn btn-primary" style="padding:8px 12px;border-radius:6px;">选择背景图片</label>
+                                {% if user.bg %}
+                                <label class="custom-clear-checkbox" for="id_bg-clear" style="margin-top:0;">
+                                    <input type="checkbox" name="{{ form.bg.name }}-clear" id="id_bg-clear">
+                                    <span>清除背景</span>
+                                </label>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <input type="file" name="{{ form.bg.name }}" id="id_bg" accept="image/*" style="display:none;">
+                        <div class="help-text">可选背景图片，默认为系统渐变背景。建议宽度 >= 1200px。</div>
+                        {% if form.bg.errors %}
+                            <ul class="error-list">
+                                {% for error in form.bg.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- 其他信息 -->
+                {% if form.bio %}
+                    <div class="form-section">
+                        <div class="form-section-title">个人介绍</div>
+                        
+                        <div class="form-group">
+                            <label for="id_bio">个人简介</label>
+                            {{ form.bio }}
+                            <div class="help-text">最多 500 个字符</div>
+                            {% if form.bio.errors %}
+                                <ul class="error-list">
+                                    {% for error in form.bio.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <!-- 操作按钮 -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">保存修改</button>
+                    <a href="{% url 'users:profile' %}" class="btn btn-secondary">取消</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div>© 2025 一息博客 • Django 出品</div>
+    </footer>
+
+    <script>
+        // JavaScript for image cropping
+        document.addEventListener('DOMContentLoaded', function () {
+            var cropper;
+            var avatarPreview = document.getElementById('avatar-preview');
+            var cropperImage = document.getElementById('cropper-image');
+            var cropperModal = document.getElementById('cropper-modal');
+            
+            document.getElementById('id_avatar').addEventListener('change', function (e) {
+                var files = e.target.files;
+                var done = function (url) {
+                    avatarPreview.src = url;
+                    cropperImage.src = url;
+                    cropperModal.style.display = 'flex';
+                };
+                
+                if (files && files.length > 0) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        done(e.target.result);
+                    };
+                    reader.readAsDataURL(files[0]);
+                }
+            });
+            
+            cropperModal.addEventListener('click', function (e) {
+                if (e.target === cropperModal) {
+                    cropperModal.style.display = 'none';
+                }
+            });
+            
+            document.getElementById('crop-confirm').addEventListener('click', function () {
+                var canvas = cropper.getCroppedCanvas({
+                    width: 200,
+                    height: 200,
+                });
+                canvas.toBlob(function (blob) {
+                    var url = URL.createObjectURL(blob);
+                    avatarPreview.src = url;
+                    document.getElementById('id_avatar').files[0] = blob;
+                    cropperModal.style.display = 'none';
+                }, 'image/jpeg', 0.8);
+            });
+            
+            document.getElementById('crop-cancel').addEventListener('click', function () {
+                cropperModal.style.display = 'none';
+            });
+            
+            cropperImage.addEventListener('load', function () {
+                if (cropper) {
+                    cropper.destroy();
+                }
+                cropper = new Cropper(cropperImage, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    autoCropArea: 1,
+                    responsive: true,
+                    restore: true,
+                    modal: true,
+                    guides: true,
+                    center: true,
+                    highlight: true,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                });
+            });
+        });
+    </script>
+    <script>
+        // 头像本地预览+裁剪
+        const avatarInput = document.getElementById('id_avatar');
+        const avatarPreview = document.getElementById('avatar-preview');
+        const cropperModal = document.getElementById('cropper-modal');
+        const cropperImage = document.getElementById('cropper-image');
+        let cropper = null;
+
+        if (avatarInput) {
+            avatarInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && file.type.match(/^image\/(jpeg|png|gif)$/)) {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        cropperImage.src = evt.target.result;
+                        cropperModal.style.display = 'flex';
+                        if (cropper) cropper.destroy();
+                        cropper = new Cropper(cropperImage, {
+                            aspectRatio: 1,
+                            viewMode: 1,
+                            minContainerWidth: 300,
+                            minContainerHeight: 300,
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        document.getElementById('crop-cancel').onclick = function() {
+            cropperModal.style.display = 'none';
+            if (cropper) cropper.destroy();
+        };
+
+        document.getElementById('crop-confirm').onclick = function() {
+            if (cropper) {
+                const canvas = cropper.getCroppedCanvas({width:256,height:256});
+                avatarPreview.src = canvas.toDataURL('image/png');
+                // 将裁剪后的图片转为blob并替换input
+                canvas.toBlob(function(blob) {
+                    const file = new File([blob], 'avatar.png', {type:'image/png'});
+                    // 创建新的DataTransfer对象替换input
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    avatarInput.files = dt.files;
+                }, 'image/png');
+                cropperModal.style.display = 'none';
+                cropper.destroy();
+            }
+        };
+
+        // 背景本地预览
+        const bgInput = document.getElementById('id_bg');
+        const bgPreview = document.getElementById('bg-preview');
+        const bgClear = document.getElementById('id_bg-clear');
+
+        if (bgInput) {
+            bgInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && file.type.match(/^image\/(jpeg|png|gif)$/)) {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        bgPreview.style.background = "url('" + evt.target.result + "') center/cover no-repeat";
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        if (bgClear) {
+            bgClear.addEventListener('change', function(e) {
+                if (e.target.checked) {
+                    bgPreview.style.background = "{{ user.bg_css|escapejs }}";
+                }
+            });
+        }
+    </script>
+</body>
+</html>

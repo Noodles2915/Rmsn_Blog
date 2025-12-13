@@ -44,6 +44,18 @@
       </div>
 
       <div>
+        <label for="id_verification_code">邮箱验证码</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="text" name="verification_code" id="id_verification_code" maxlength="6" required style="flex:1">
+          <button type="button" id="send_vcode_btn" class="btn" style="padding:8px 10px;white-space:nowrap">发送验证码</button>
+        </div>
+        <div id="vcode_msg" class="errors" style="display:none;margin-top:6px"></div>
+        {% if form.verification_code.errors %}
+          <div class="errors">{{ form.verification_code.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div>
         <label for="id_password">密码</label>
         <input type="password" name="password" id="id_password" required>
         {% if form.password.errors %}
@@ -62,6 +74,121 @@
       <button class="btn" type="submit">注册并登录</button>
     </form>
 
+    <script>
+      // 获取 CSRF token（从 cookie）
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+      }
+
+      const sendBtn = document.getElementById('send_vcode_btn');
+      const emailInput = document.getElementById('id_email');
+      const vcodeMsg = document.getElementById('vcode_msg');
+      const vcodeInput = document.getElementById('id_verification_code');
+
+      const COOLDOWN_DEFAULT = 60; // seconds
+
+      function storageKeyFor(email) {
+        return 'vcode_cooldown_' + email;
+      }
+
+      function startCooldown(seconds, email) {
+        const key = storageKeyFor(email);
+        const expiry = Date.now() + seconds * 1000;
+        try { localStorage.setItem(key, String(expiry)); } catch (e) {}
+
+        sendBtn.disabled = true;
+        let t = seconds;
+        sendBtn.textContent = `已发送(${t}s)`;
+        const iv = setInterval(() => {
+          t -= 1;
+          if (t <= 0) {
+            clearInterval(iv);
+            sendBtn.disabled = false;
+            sendBtn.textContent = '发送验证码';
+            try { localStorage.removeItem(key); } catch(e){}
+          } else {
+            sendBtn.textContent = `已发送(${t}s)`;
+          }
+        }, 1000);
+      }
+
+      function checkCooldownFor(email) {
+        if (!email) return 0;
+        const key = storageKeyFor(email);
+        try {
+          const v = localStorage.getItem(key);
+          if (!v) return 0;
+          const expiry = parseInt(v, 10);
+          const remain = Math.ceil((expiry - Date.now()) / 1000);
+          return remain > 0 ? remain : 0;
+        } catch (e) { return 0; }
+      }
+
+      // 在页面载入或 email 改变时，恢复冷却显示
+      function restoreCooldownIfAny() {
+        const email = emailInput.value.trim();
+        const remain = checkCooldownFor(email);
+        if (remain > 0) startCooldown(remain, email);
+      }
+
+      // 当 email 改变，更新按钮状态（如果不同邮箱则清除显示）
+      emailInput.addEventListener('input', function () {
+        // 只有当当前按钮不是 disabled 的时候才尝试恢复（避免覆盖正在计时的状态）
+        if (!sendBtn.disabled) {
+          restoreCooldownIfAny();
+        }
+      });
+
+      function showMsg(msg) {
+        vcodeMsg.style.display = 'block';
+        vcodeMsg.textContent = msg;
+      }
+
+      sendBtn.addEventListener('click', function () {
+        const email = emailInput.value.trim();
+        if (!email) { showMsg('请输入邮箱后再发送验证码'); return; }
+
+        // 本地持久化冷却检查（优先于请求），确保在刷新后也能看到冷却状态
+        const localRemain = checkCooldownFor(email);
+        if (localRemain > 0) { startCooldown(localRemain, email); showMsg('请稍后再试'); return; }
+
+        sendBtn.disabled = true;
+        sendBtn.textContent = '发送中...';
+        vcodeMsg.style.display = 'none';
+
+        fetch('{% url "users:send_vcode" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken') || ''
+          },
+          body: new URLSearchParams({ email: email })
+        }).then(async (r) => {
+          let data = {};
+          try { data = await r.json(); } catch(e){}
+          if (r.ok && data.ok) {
+            showMsg('验证码已发送，请注意查收（可能在垃圾邮件里）。');
+            const remain = data.retry_after || COOLDOWN_DEFAULT;
+            startCooldown(remain, email);
+          } else {
+            // 如果返回 429 并包含 retry_after，使用它
+            const retry = data.retry_after || (data.retry_after === 0 ? 0 : null);
+            if (retry) startCooldown(retry, email);
+            showMsg(data.error || '发送失败');
+            if (!retry) { sendBtn.disabled = false; sendBtn.textContent = '发送验证码'; }
+          }
+        }).catch(err => {
+          showMsg('发送失败：' + err);
+          sendBtn.disabled = false;
+          sendBtn.textContent = '发送验证码';
+        });
+      });
+
+      // 页面加载时，尝试从 localStorage 恢复冷却（如果 email 已填写）
+      document.addEventListener('DOMContentLoaded', function () { restoreCooldownIfAny(); });
+    </script>
     <div class="foot">已有账号？ <a href="{% url 'users:login' %}">去登录</a></div>
   </div>
 </body>

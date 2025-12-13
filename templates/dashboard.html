@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>仪表盘 - 一息博客</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg: #f6f7fb;
+            --card: #ffffff;
+            --accent: #2b6cb0;
+            --accent-hover: #1e4f7a;
+            --muted: #6b7280;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border: #e6e9ef;
+        }
+        
+        body {
+            font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: #111;
+        }
+        
+        header {
+            background: linear-gradient(90deg, #fff 0%, #f8fafc 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .brand h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+        }
+        
+        .username {
+            font-weight: 600;
+            color: #111;
+        }
+        
+        .logout-btn {
+            padding: 8px 12px;
+            background: var(--danger);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.2s;
+        }
+        
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .user-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
+        }
+        
+        .user-card .avatar {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 12px;
+        }
+        
+        .user-card .username {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        
+        .user-card .email {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 16px;
+        }
+        
+        .user-card .join-date {
+            font-size: 12px;
+            color: var(--muted);
+        }
+        
+        .edit-profile-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 12px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: background 0.2s;
+        }
+        
+        .edit-profile-btn:hover {
+            background: var(--accent-hover);
+        }
+        
+        .quick-actions {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
+        }
+        
+        .quick-actions h3 {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+            font-weight: 700;
+            background: #f9fafb;
+        }
+        
+        .action-list {
+            list-style: none;
+        }
+        
+        .action-list li {
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .action-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .action-list a {
+            display: block;
+            padding: 12px 16px;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.15s;
+        }
+        
+        .action-list a:hover {
+            background: #f9fafb;
+        }
+        
+        .main-content {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
+            overflow: hidden;
+        }
+        
+        .content-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f9fafb;
+        }
+        
+        .content-header h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+        
+        .new-post-btn {
+            padding: 10px 16px;
+            background: var(--success);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.2s;
+        }
+        
+        .new-post-btn:hover {
+            background: #059669;
+        }
+        
+        .content-body {
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: #f9fafb;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+        
+        .posts-section h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .post-list {
+            list-style: none;
+        }
+        
+        .post-item {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f9fafb;
+        }
+        
+        .post-item-left {
+            flex: 1;
+        }
+        
+        .post-item-title {
+            font-weight: 600;
+            color: #111;
+            margin-bottom: 4px;
+        }
+        
+        .post-item-meta {
+            font-size: 12px;
+            color: var(--muted);
+        }
+        
+        .post-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .post-action-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: #fff;
+            color: var(--accent);
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+        
+        .post-action-btn:hover {
+            background: #f0f4f8;
+        }
+        
+        .no-posts {
+            text-align: center;
+            padding: 32px;
+            color: var(--muted);
+        }
+        
+        .no-posts a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        footer {
+            max-width: 1200px;
+            margin: 40px auto;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+            padding: 0 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-right {
+                flex-direction: column;
+            }
+            
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="24" height="24" rx="5" fill="#2b6cb0"/>
+                <text x="50%" y="55%" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="12" font-weight="700">RB</text>
+            </svg>
+            <h1>一息博客</h1>
+        </div>
+
+        <div class="header-right">
+            <div class="user-info">
+                <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="avatar">
+                <span class="username">{{ user.username }}</span>
+            </div>
+            <a href="{% url 'users:logout' %}" class="logout-btn">退出登录</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="dashboard-grid">
+            <!-- 侧边栏 -->
+            <aside class="sidebar">
+                <!-- 用户卡片 -->
+                <div class="user-card">
+                    <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="avatar">
+                    <span class="username">{{ user.username }}</span>
+                    <div class="email">{{ user.email }}</div>
+                    <div class="join-date">加入于 {{ user.date_joined|date:"Y年m月d日" }}</div>
+                    <a href="{% url 'users:profile_edit' %}" class="edit-profile-btn">编辑个人信息</a>
+                </div>
+
+                <!-- 快速操作 -->
+                <div class="quick-actions">
+                    <h3>快速操作</h3>
+                    <ul class="action-list">
+                        <li><a href="{% url 'posting:new_post' %}">✏️ 发布新文章</a></li>
+                        <li><a href="{% url 'users:profile' %}">👤 查看个人页</a></li>
+                        <li><a href="{% url 'index' %}">🏠 返回首页</a></li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- 主内容区 -->
+            <main class="main-content">
+                <div class="content-header">
+                    <h2>我的文章</h2>
+                    <a href="{% url 'posting:new_post' %}" class="new-post-btn">+ 发布文章</a>
+                </div>
+
+                <div class="content-body">
+                    <!-- 统计卡片 -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">{{ posts_count }}</div>
+                            <div class="stat-label">发布文章</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">{{ comments_count }}</div>
+                            <div class="stat-label">收到评论</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">{{ views_count }}</div>
+                            <div class="stat-label">总浏览量</div>
+                        </div>
+                    </div>
+
+                    <!-- 文章列表 -->
+                    <div class="posts-section">
+                        <h3>最近发布的文章</h3>
+                        {% if user_posts %}
+                            <ul class="post-list">
+                                {% for post in user_posts %}
+                                    <li class="post-item">
+                                        <div class="post-item-left">
+                                            <div class="post-item-title">{{ post.title }}</div>
+                                            <div class="post-item-meta">
+                                                发布于 {{ post.created_at|date:"Y-m-d H:i" }} • 
+                                                修改于 {{ post.updated_at|date:"Y-m-d H:i" }}
+                                            </div>
+                                        </div>
+                                        <div class="post-item-actions">
+                                            <a href="{% url 'posting:view_post' post.id %}" class="post-action-btn">查看</a>
+                                            <a href="{% url 'posting:edit_post' post.id %}" class="post-action-btn">编辑</a>
+                                            <a href="{% url 'posting:delete_post' post.id %}" class="post-action-btn" style="color: var(--danger);">删除</a>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <div class="no-posts">
+                                <p>还没有发布任何文章</p>
+                                <p><a href="{% url 'posting:new_post' %}">立即发布第一篇文章</a></p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <footer>
+        <div>© 2025 一息博客 • Django 出品</div>
+    </footer>
+</body>
+</html>

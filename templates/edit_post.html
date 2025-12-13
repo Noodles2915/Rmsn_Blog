@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>编辑文章 - 一息博客</title>
+    <link href="https://cdn.jsdelivr.net/npm/simplemde@1.11.2/dist/simplemde.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/simplemde@1.11.2/dist/simplemde.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg: #f6f7fb;
+            --card: #ffffff;
+            --accent: #2b6cb0;
+            --accent-hover: #1e4f7a;
+            --muted: #6b7280;
+            --danger: #ef4444;
+            --border: #e6e9ef;
+        }
+        
+        body {
+            font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: #111;
+        }
+        
+        header {
+            background: linear-gradient(90deg, #fff 0%, #f8fafc 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .brand h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .back-btn {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .back-btn:hover {
+            color: var(--accent-hover);
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 24px auto;
+            padding: 0 24px;
+        }
+        
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .card-header h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+        
+        .card-body {
+            padding: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
+        }
+        
+        .form-group.editor-group {
+            margin-bottom: 24px;
+        }
+        
+        .editor-group .CodeMirror {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            min-height: 400px;
+        }
+        
+        .tags-input-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            min-height: 40px;
+            align-items: center;
+        }
+        
+        .tag {
+            background: var(--accent);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+        
+        .tag-remove {
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .tags-input-container input {
+            border: none;
+            padding: 0;
+            flex: 1;
+            min-width: 100px;
+            font-size: 14px;
+        }
+        
+        .tags-input-container input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+        
+        .error-list {
+            color: var(--danger);
+            font-size: 12px;
+            margin-top: 6px;
+            list-style: none;
+        }
+        
+        .error-list li {
+            margin-bottom: 4px;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            flex: 1;
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+        
+        .btn-secondary {
+            background: #f0f4f8;
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: #e8ecf1;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .form-section {
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .form-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .form-section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #111;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .post-meta {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 16px;
+        }
+        
+        footer {
+            max-width: 1000px;
+            margin: 40px auto;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+            padding: 0 24px;
+        }
+        
+        @media (max-width: 640px) {
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="24" height="24" rx="5" fill="#2b6cb0"/>
+                <text x="50%" y="55%" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="12" font-weight="700">RB</text>
+            </svg>
+            <h1>一息博客</h1>
+        </div>
+
+        <div class="header-right">
+            <a href="{% url 'users:dashboard' %}" class="back-btn">← 返回仪表盘</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2>✏️ 编辑文章</h2>
+            </div>
+            
+            <form method="post" class="card-body">
+                {% csrf_token %}
+                
+                <!-- 文章元数据 -->
+                <div class="post-meta">
+                    创建于 {{ post.created_at|date:"Y-m-d H:i" }} • 
+                    最后修改 {{ post.updated_at|date:"Y-m-d H:i" }}
+                </div>
+                
+                <!-- 基本信息部分 -->
+                <div class="form-section">
+                    <div class="form-section-title">文章信息</div>
+                    
+                    <div class="form-group">
+                        <label for="title">文章标题 *</label>
+                        {% if form.title %}
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <ul class="error-list">
+                                    {% for error in form.title.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        {% else %}
+                            <input type="text" id="title" name="title" value="{{ post.title }}" placeholder="请输入文章标题" required>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="two-column">
+                        <div class="form-group">
+                            <label for="tags">标签</label>
+                            {% if form.tags %}
+                                <div class="tags-input-container">
+                                    <input type="text" id="tags-input" placeholder="输入标签后按回车">
+                                </div>
+                                <input type="hidden" id="tags" name="tags">
+                                {% if form.tags.errors %}
+                                    <ul class="error-list">
+                                        {% for error in form.tags.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            {% else %}
+                                <div class="tags-input-container">
+                                    <input type="text" id="tags-input" placeholder="输入标签后按回车">
+                                </div>
+                            {% endif %}
+                            <div class="help-text">按回车添加标签，点击标签可删除</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="status">发布状态</label>
+                            <select id="status" name="status">
+                                <option value="draft">草稿</option>
+                                <option value="published" selected>发布</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 内容部分 -->
+                <div class="form-section">
+                    <div class="form-section-title">文章内容</div>
+                    
+                    <div class="form-group editor-group">
+                        <label for="content">文章内容 * (Markdown 格式)</label>
+                        {% if form.content %}
+                            {{ form.content }}
+                            {% if form.content.errors %}
+                                <ul class="error-list">
+                                    {% for error in form.content.errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        {% else %}
+                            <textarea id="content" name="content" placeholder="在此输入文章内容，支持 Markdown 格式" required>{{ post.content }}</textarea>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" name="action" value="save">保存修改</button>
+                    <button type="submit" class="btn btn-secondary" name="action" value="draft" style="border: none; color: #111;">保存为草稿</button>
+                    <a href="{% url 'users:dashboard' %}" class="btn btn-secondary">取消</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div>© 2025 一息博客 • Django 出品</div>
+    </footer>
+
+    <script>
+        // 初始化 Markdown 编辑器
+        const simplemde = new SimpleMDE({
+            element: document.getElementById("content"),
+            spellChecker: false,
+            placeholder: "在此输入文章内容，支持 Markdown 格式...",
+            toolbar: [
+                "bold", "italic", "heading", "|",
+                "quote", "unordered-list", "ordered-list", "|",
+                "link", "image", "|",
+                "preview", "side-by-side", "fullscreen", "|",
+                "guide"
+            ]
+        });
+
+        // 标签管理
+        const tagsContainer = document.querySelector('.tags-input-container');
+        const tagsInput = document.getElementById('tags-input');
+        const tagsHidden = document.getElementById('tags');
+        let tags = [{% for tag in post.tags.all %}"{{ tag.name }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+
+        if (tagsInput) {
+            tagsInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const tag = tagsInput.value.trim();
+                    if (tag && !tags.includes(tag)) {
+                        tags.push(tag);
+                        renderTags();
+                        tagsInput.value = '';
+                        updateTagsHidden();
+                    }
+                }
+            });
+        }
+
+        function renderTags() {
+            const tagElements = tags.map(tag => `
+                <div class="tag">
+                    <span>${tag}</span>
+                    <span class="tag-remove" onclick="removeTag('${tag}')">×</span>
+                </div>
+            `).join('');
+            
+            tagsContainer.innerHTML = tagElements + '<input type="text" id="tags-input" placeholder="输入标签后按回车">';
+            document.getElementById('tags-input').addEventListener('keypress', handleTagInput);
+        }
+
+        function removeTag(tag) {
+            tags = tags.filter(t => t !== tag);
+            renderTags();
+            updateTagsHidden();
+        }
+
+        function updateTagsHidden() {
+            if (tagsHidden) {
+                tagsHidden.value = tags.join(',');
+            }
+        }
+
+        function handleTagInput(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const tag = this.value.trim();
+                if (tag && !tags.includes(tag)) {
+                    tags.push(tag);
+                    renderTags();
+                    updateTagsHidden();
+                }
+            }
+        }
+
+        // 初始化标签
+        renderTags();
+    </script>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ post.title }} - 一息博客</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg: #f6f7fb;
+            --card: #ffffff;
+            --accent: #2b6cb0;
+            --accent-hover: #1e4f7a;
+            --muted: #6b7280;
+            --border: #e6e9ef;
+        }
+        
+        body {
+            font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: #111;
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(90deg, #fff 0%, #f8fafc 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .brand h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .back-btn {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .back-btn:hover {
+            color: var(--accent-hover);
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+        
+        .post-header {
+            margin-bottom: 32px;
+        }
+        
+        .post-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #111;
+        }
+        
+        .post-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+        
+        .post-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .author-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .author-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .tag {
+            background: #f0f4f8;
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            text-decoration: none;
+        }
+        
+        .tag:hover {
+            background: #e8ecf1;
+        }
+        
+        .post-content {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
+        }
+        
+        .post-content h1,
+        .post-content h2,
+        .post-content h3 {
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+        
+        .post-content h1 {
+            font-size: 28px;
+        }
+        
+        .post-content h2 {
+            font-size: 22px;
+        }
+        
+        .post-content h3 {
+            font-size: 18px;
+        }
+        
+        .post-content p {
+            margin-bottom: 16px;
+        }
+        
+        .post-content pre {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+        }
+        
+        .post-content code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        
+        .post-content pre code {
+            background: transparent;
+            padding: 0;
+        }
+        
+        .post-content ul,
+        .post-content ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+        
+        .post-content li {
+            margin-bottom: 8px;
+        }
+        
+        .post-content blockquote {
+            border-left: 4px solid var(--accent);
+            padding-left: 16px;
+            margin-left: 0;
+            margin-bottom: 16px;
+            color: var(--muted);
+            font-style: italic;
+        }
+        
+        .post-footer {
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 24px;
+        }
+        
+        .post-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+            color: var(--accent);
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        
+        .btn:hover {
+            background: #f0f4f8;
+        }
+        
+        .comments-section {
+            margin-top: 48px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .comments-section h2 {
+            font-size: 20px;
+            margin-bottom: 24px;
+        }
+        
+        footer {
+            max-width: 800px;
+            margin: 40px auto;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+            padding: 0 24px;
+        }
+        
+        @media (max-width: 640px) {
+            .post-title {
+                font-size: 24px;
+            }
+            
+            .post-meta {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .post-content {
+                padding: 16px;
+            }
+            
+            .post-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="24" height="24" rx="5" fill="#2b6cb0"/>
+                <text x="50%" y="55%" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="12" font-weight="700">RB</text>
+            </svg>
+            <h1>一息博客</h1>
+        </div>
+
+        <div class="header-right">
+            <a href="{% url 'index' %}" class="back-btn">← 返回首页</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <article>
+            <header class="post-header">
+                <h1 class="post-title">{{ post.title }}</h1>
+                
+                <div class="post-meta">
+                    <div class="post-meta-item">
+                        <div class="author-info">
+                            <img src="{{ post.author.avatar_url }}" alt="{{ post.author.username }}" class="author-avatar">
+                            <span>{{ post.author.username }}</span>
+                        </div>
+                    </div>
+                    <div class="post-meta-item">
+                        📅 {{ post.created_at|date:"Y-m-d H:i" }}
+                    </div>
+                    {% if post.updated_at != post.created_at %}
+                        <div class="post-meta-item">
+                            ✏️ 修改于 {{ post.updated_at|date:"Y-m-d H:i" }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                {% if post.tags.exists %}
+                    <div class="post-tags">
+                        {% for tag in post.tags.all %}
+                            <a href="#" class="tag">#{{ tag.name }}</a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </header>
+            
+            <div class="post-content">
+                {{ post.content|safe }}
+            </div>
+            
+            <footer class="post-footer">
+                <div>
+                    <small>本文由 <strong>{{ post.author.username }}</strong> 发布</small>
+                </div>
+                <div class="post-actions">
+                    <a href="{% url 'index' %}" class="btn">← 返回首页</a>
+                </div>
+            </footer>
+        </article>
+        
+        <!-- 评论区域（暂未实现） -->
+        <!-- <section class="comments-section">
+            <h2>评论</h2>
+            <p>评论功能即将推出...</p>
+        </section> -->
+    </div>
+
+    <footer>
+        <div>© 2025 一息博客 • Django 出品</div>
+    </footer>
+</body>
+</html>
