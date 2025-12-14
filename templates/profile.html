@@ -4,257 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>个人信息 - 一息博客</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg: #f6f7fb;
-            --card: #ffffff;
-            --accent: #2b6cb0;
-            --accent-hover: #1e4f7a;
-            --muted: #6b7280;
-            --danger: #ef4444;
-            --border: #e6e9ef;
-        }
-
-        body {
-            font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: var(--bg);
-            color: #111;
-        }
-
-        header {
-            background: linear-gradient(90deg, #fff 0%, #f8fafc 100%);
-            border-bottom: 1px solid var(--border);
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .brand h1 {
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--accent);
-        }
-
-        .back-btn {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .back-btn:hover {
-            color: var(--accent-hover);
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 32px auto;
-            padding: 0 24px;
-        }
-
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
-            background: #f9fafb;
-        }
-
-        .card-header h2 {
-            font-size: 18px;
-            margin: 0;
-        }
-
-        .card-body {
-            padding: 24px;
-        }
-
-        .profile-intro {
-            display: flex;
-            gap: 24px;
-            align-items: flex-start;
-            margin-bottom: 32px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .profile-avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 8px;
-            object-fit: cover;
-            border: 2px solid var(--accent);
-        }
-
-        .profile-info h3 {
-            font-size: 20px;
-            margin-bottom: 8px;
-        }
-
-        .profile-info p {
-            color: var(--muted);
-            margin-bottom: 4px;
-            font-size: 14px;
-        }
-
-        .profile-meta {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-top: 12px;
-        }
-
-        .meta-item {
-            font-size: 13px;
-        }
-
-        .meta-label {
-            color: var(--muted);
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .meta-value {
-            color: #111;
-            font-weight: 600;
-        }
-
-        .actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .btn {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-hover);
-        }
-
-        .btn-secondary {
-            background: #f0f4f8;
-            color: var(--accent);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background: #e8ecf1;
-        }
-
-        .stats-section {
-            margin-top: 32px;
-        }
-
-        .stats-section h3 {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-
-        .stat-card {
-            background: #f9fafb;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: var(--muted);
-            font-weight: 600;
-        }
-
-        footer {
-            max-width: 800px;
-            margin: 40px auto;
-            text-align: center;
-            color: var(--muted);
-            font-size: 13px;
-            padding: 0 24px;
-        }
-
-        @media (max-width: 640px) {
-            .profile-intro {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-
-            .actions {
-                width: 100%;
-            }
-
-            .btn {
-                flex: 1;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
 </head>
-<body style="background: {{ user.bg_css|safe }}; background-color: var(--bg);">
+<body class="profile-bg-container" style="background: {{ user.bg_css|safe }};">
     <header>
         <div class="brand">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -271,7 +24,7 @@
 
     <div class="container">
             <div class="card">
-            <div class="card-header" style="background: {{ user.bg_css|safe }}; color: #fff;">
+            <div class="card-header">
                 <h2>个人信息</h2>
             </div>
 
@@ -280,9 +33,13 @@
                 <div class="profile-intro">
                     <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="profile-avatar">
 
-                    <div class="profile-info" style="flex: 1;">
+                    <div class="profile-info">
                         <h3>{{ user.username }}</h3>
                         <p>{{ user.email }}</p>
+
+                        <div class="profile-bio">
+                            <p>{{ user.bio }}</p>
+                        </div>
 
                         <div class="profile-meta">
                             <div class="meta-item">
@@ -303,7 +60,7 @@
                             </div>
                         </div>
 
-                        <div class="actions" style="margin-top: 16px;">
+                        <div class="actions">
                             {% if is_own_profile %}
                                 <a href="{% url 'users:profile_edit' %}" class="btn btn-primary">编辑信息</a>
                             {% endif %}

@@ -1,37 +1,46 @@
-<div id="comment-{{ comment.id }}" class="comment" style="margin-left: {{ offset }}px; margin-top:12px; padding:12px; border:1px solid #e6e9ef; border-radius:8px; background:#fff;">
-    <div style="display:flex; gap:8px; align-items:center;">
-        <div style="width:36px; height:36px; border-radius:50%; background:#f0f4f8; display:inline-flex; align-items:center; justify-content:center; font-weight:700; color:#2b6cb0;">{{ comment.author|slice:":1"|upper }}</div>
-        <div>
-            <div style="font-weight:700;">{{ comment.author }}</div>
-            <div style="font-size:12px; color:#6b7280;">{{ comment.created_at|date:"Y-m-d H:i" }}</div>
+<div id="comment-{{ comment.id }}" class="comment">
+    <img src="{{ comment.author.avatar_url }}" alt="{{ comment.author.username }}" class="comment-avatar">
+    <div class="comment-body">
+        <div class="comment-header">
+            <a href="{% url 'users:profile_user' comment.author.username %}" class="comment-author-link">
+                {{ comment.author.username }}
+            </a>
+            <span class="comment-date">{{ comment.created_at|date:"Y-m-d H:i" }}</span>
         </div>
-    </div>
 
-    <div style="margin-top:8px;">
-        <div class="comment-content">{{ comment.content|safe }}</div>
-    </div>
+        <div class="comment-content">
+            {{ comment.content|safe }}
+        </div>
 
-    <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
-        <button class="btn-reply" data-comment-id="{{ comment.id }}" style="background:none; border:none; color:#2b6cb0; font-weight:600; cursor:pointer;">回复</button>
-    </div>
+        <div class="comment-actions">
+            {% if user %}
+                <button class="btn-reply comment-action" data-comment-id="{{ comment.id }}">回复</button>
+                {% if user.id == comment.author.id or user.id == post.author.id %}
+                    <button class="btn-delete-comment comment-action" data-comment-id="{{ comment.id }}">删除</button>
+                {% endif %}
+            {% else %}
+                <a href="{% url 'users:login' %}?next={{ request.path }}" class="comment-action">回复（需登录）</a>
+            {% endif %}
+        </div>
 
-    <div class="reply-form-container" id="reply-form-{{ comment.id }}" style="display:none; margin-top:12px;">
-        <form method="post" action="{% url 'posting:add_comment' post.id %}">
-            {% csrf_token %}
-            <input type="hidden" name="parent_id" value="{{ comment.id }}">
-            <div class="form-group">
-                <textarea name="content" rows="4" style="width:100%; padding:8px; border:1px solid #e6e9ef; border-radius:6px;"></textarea>
-            </div>
-            <div style="margin-top:8px;">
-                <button type="submit" class="btn btn-primary" style="background:#2b6cb0; color:#fff; padding:6px 12px; border-radius:6px;">提交回复</button>
-                <button type="button" class="btn-cancel-reply" data-comment-id="{{ comment.id }}" style="margin-left:8px; padding:6px 12px; border-radius:6px; border:1px solid #e6e9ef;">取消</button>
-            </div>
-        </form>
-    </div>
+        {% if user %}
+        <div class="reply-form-container" id="reply-form-{{ comment.id }}" style="display: none;">
+            <form method="post" action="{% url 'posting:add_comment' post.id %}" class="reply-form">
+                {% csrf_token %}
+                <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                <textarea name="content" rows="4" placeholder="在此输入回复，支持 Markdown..."></textarea>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">提交回复</button>
+                    <button type="button" class="btn-cancel-reply btn btn-secondary" data-comment-id="{{ comment.id }}">取消</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
 
-    <div class="replies-container" style="margin-top:12px;">
-    {% for reply in comment.replies.all %}
-        {% include "_comment.html" with comment=reply offset=offset|add:24 post=post %}
-    {% endfor %}
+        <div class="replies-container">
+        {% for reply in comment.replies.all %}
+            {% include "_comment.html" with comment=reply post=post %}
+        {% endfor %}
+        </div>
     </div>
 </div>

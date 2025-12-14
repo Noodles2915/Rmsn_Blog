@@ -52,9 +52,10 @@ def index(request):
         return redirect('users:login')
     
 def login(request):
-    # 如果已登录，跳转到站点首页或仪表盘
+    # 如果已登录，跳转到 next 参数或站点首页
     if get_current_user(request):
-        return redirect('index')
+        next_url = request.GET.get('next', 'index')
+        return redirect(next_url)
 
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -65,7 +66,9 @@ def login(request):
                 user = User.objects.get(username=username)
                 if user.verify_password(password):
                     token = UserSession.create_session(user)
-                    response = redirect('index')
+                    # 登录成功后跳转到 next 参数指定的页面，或默认首页
+                    next_url = request.POST.get('next') or request.GET.get('next', 'index')
+                    response = redirect(next_url)
                     # cookie 保持与 session 有效期一致（7 天）
                     response.set_cookie('session_token', token, max_age=7*24*3600, httponly=True)
                     return response
@@ -76,12 +79,15 @@ def login(request):
     else:
         form = LoginForm()
 
-    return render(request, 'login.html', {'form': form})
+    # 将 next 参数传递给模板，以便在表单提交时保持
+    next_url = request.GET.get('next', '')
+    return render(request, 'login.html', {'form': form, 'next': next_url})
 
 
 def register(request):
     if get_current_user(request):
-        return redirect('index')
+        next_url = request.GET.get('next', 'index')
+        return redirect(next_url)
 
     if request.method == 'POST':
         form = RegistrationForm(request.POST, request=request)
@@ -99,19 +105,23 @@ def register(request):
                 user.password_encrypt(password)
                 user.save()
                 token = UserSession.create_session(user)
-                response = redirect('index')
+                # 注册成功后跳转到 next 参数指定的页面，或默认首页
+                next_url = request.POST.get('next') or request.GET.get('next', 'index')
+                response = redirect(next_url)
                 response.set_cookie('session_token', token, max_age=7*24*3600, httponly=True)
                 return response
     else:
         form = RegistrationForm()
 
-    return render(request, 'register.html', {'form': form})
+    # 将 next 参数传递给模板
+    next_url = request.GET.get('next', '')
+    return render(request, 'register.html', {'form': form, 'next': next_url})
 
 
 def dashboard(request):
     user = get_current_user(request)
     if not user:
-        return redirect('login')
+        return redirect('users:login')
     
     # 获取用户发布的文章统计
     from posting.models import Post, Comment
@@ -178,7 +188,25 @@ def profile_edit(request):
 
     if request.method == 'POST':
         form = ProfileEditForm(request.POST, request.FILES, instance=user)
-        if form.is_valid():
+        new_email = request.POST.get('email', '').strip()
+        
+        # 如果邮箱有变化，需要验证码验证
+        if new_email and new_email != user.email:
+            verification_code = request.POST.get('verification_code', '').strip()
+            session_vcode = request.session.get('verification_code')
+            session_email = request.session.get('verification_email')
+            
+            if not verification_code or not session_vcode or not session_email:
+                form.add_error('email', '请先获取并输入验证码')
+            elif verification_code != session_vcode or session_email != new_email:
+                form.add_error('email', '验证码错误或已过期')
+            elif form.is_valid():
+                # 清空session中的验证码
+                request.session.pop('verification_code', None)
+                request.session.pop('verification_email', None)
+                form.save()
+                return redirect('users:profile')
+        elif form.is_valid():
             form.save()
             return redirect('users:profile')
     else:

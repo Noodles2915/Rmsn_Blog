@@ -2,25 +2,10 @@
 
 {% block title %}确认删除 - 一息博客{% endblock %}
 
-{% block head %}
-<style>
-    :root{--bg:#f6f7fb;--card:#ffffff;--accent:#2b6cb0;--muted:#6b7280;--danger:#ef4444;--border:#e6e9ef}
-    .container{max-width:600px;margin:60px auto;padding:0 24px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-    .card-header{padding:20px;border-bottom:1px solid var(--border);background:#f9fafb}
-    .card-header h2{font-size:18px;margin:0;color:var(--danger)}
-    .card-body{padding:32px;text-align:center}
-    .warning-icon{font-size:48px;margin-bottom:16px}
-    .post-info{background:#f9fafb;border:1px solid var(--border);border-radius:8px;padding:16px;margin:24px 0;text-align:left}
-    .form-actions{display:flex;gap:12px;margin-top:28px;padding-top:24px;border-top:1px solid var(--border)}
-    .btn{flex:1;padding:10px 20px;border-radius:6px}
-    .btn-danger{background:var(--danger);color:#fff}
-    .btn-secondary{background:#f0f4f8;color:var(--accent);border:1px solid var(--border)}
-</style>
-{% endblock %}
+{% block head %}{% endblock %}
 
 {% block content %}
-    <div class="container">
+    <div class="container-narrow">
         <div class="card">
             <div class="card-header"><h2>⚠️ 确认删除文章</h2></div>
             <div class="card-body">
@@ -28,7 +13,9 @@
                 <h3>你确定要删除这篇文章吗？</h3>
                 <p>此操作无法撤销。删除后，文章及相关评论将永久移除。</p>
                 <div class="post-info"><strong>{{ post.title }}</strong><small>发布于 {{ post.created_at|date:"Y-m-d H:i" }}</small></div>
-                <form method="post" style="display:inline-block;width:100%;">{% csrf_token %}<div class="form-actions"><button type="submit" class="btn btn-danger">删除文章</button><a href="{% url 'users:dashboard' %}" class="btn btn-secondary">取消</a></div></form>
+                <form method="post">{% csrf_token %}
+                    <div class="form-actions"><button type="submit" class="btn btn-danger">删除文章</button><a href="{% url 'users:dashboard' %}" class="btn btn-secondary">取消</a></div>
+                </form>
             </div>
         </div>
     </div>

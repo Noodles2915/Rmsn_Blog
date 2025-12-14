@@ -1,3 +1,4 @@
+{% load static %}
 <!doctype html>
 <html lang="zh-cn">
 <head>
@@ -5,277 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ post.title }} - 一息博客</title>
     <link href="https://cdn.jsdelivr.net/npm/simplemde@1.11.2/dist/simplemde.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/simplemde@1.11.2/dist/simplemde.min.js"></script>
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg: #f6f7fb;
-            --card: #ffffff;
-            --accent: #2b6cb0;
-            --accent-hover: #1e4f7a;
-            --muted: #6b7280;
-            --border: #e6e9ef;
-        }
-
-        body {
-            font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: var(--bg);
-            color: #111;
-            line-height: 1.6;
-        }
-
-        header {
-            background: linear-gradient(90deg, #fff 0%, #f8fafc 100%);
-            border-bottom: 1px solid var(--border);
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .brand h1 {
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .back-btn {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .back-btn:hover {
-            color: var(--accent-hover);
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 32px auto;
-            padding: 0 24px;
-        }
-
-        .post-header {
-            margin-bottom: 32px;
-        }
-
-        .post-title {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            color: #111;
-        }
-
-        .post-meta {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 16px;
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        .post-meta-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .author-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .author-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .post-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 24px;
-        }
-
-        .tag {
-            background: #f0f4f8;
-            color: var(--accent);
-            padding: 4px 12px;
-            border-radius: 16px;
-            font-size: 13px;
-            text-decoration: none;
-        }
-
-        .tag:hover {
-            background: #e8ecf1;
-        }
-
-        .post-content {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 32px;
-            margin-bottom: 32px;
-            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
-        }
-
-        .post-content h1,
-        .post-content h2,
-        .post-content h3 {
-            margin-top: 24px;
-            margin-bottom: 12px;
-        }
-
-        .post-content h1 {
-            font-size: 28px;
-        }
-
-        .post-content h2 {
-            font-size: 22px;
-        }
-
-        .post-content h3 {
-            font-size: 18px;
-        }
-
-        .post-content p {
-            margin-bottom: 16px;
-        }
-
-        .post-content pre {
-            background: #f5f5f5;
-            padding: 12px;
-            border-radius: 6px;
-            overflow-x: auto;
-            margin-bottom: 16px;
-        }
-
-        .post-content code {
-            background: #f5f5f5;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        .post-content pre code {
-            background: transparent;
-            padding: 0;
-        }
-
-        .post-content ul,
-        .post-content ol {
-            margin-left: 24px;
-            margin-bottom: 16px;
-        }
-
-        .post-content li {
-            margin-bottom: 8px;
-        }
-
-        .post-content blockquote {
-            border-left: 4px solid var(--accent);
-            padding-left: 16px;
-            margin-left: 0;
-            margin-bottom: 16px;
-            color: var(--muted);
-            font-style: italic;
-        }
-
-        .post-footer {
-            padding-top: 24px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 24px;
-        }
-
-        .post-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background: #fff;
-            color: var(--accent);
-            text-decoration: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-
-        .btn:hover {
-            background: #f0f4f8;
-        }
-
-        .comments-section {
-            margin-top: 48px;
-            padding-top: 32px;
-            border-top: 1px solid var(--border);
-        }
-
-        .comment { margin-bottom: 12px }
-
-        .comments-section h2 {
-            font-size: 20px;
-            margin-bottom: 24px;
-        }
-
-        footer {
-            max-width: 800px;
-            margin: 40px auto;
-            text-align: center;
-            color: var(--muted);
-            font-size: 13px;
-            padding: 0 24px;
-        }
-
-        @media (max-width: 640px) {
-            .post-title {
-                font-size: 24px;
-            }
-
-            .post-meta {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .post-content {
-                padding: 16px;
-            }
-
-            .post-footer {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 16px;
-            }
-        }
-    </style>
 </head>
 <body>
     <header>
@@ -301,7 +33,7 @@
                     <div class="post-meta-item">
                         <div class="author-info">
                             <img src="{{ post.author.avatar_url }}" alt="{{ post.author.username }}" class="author-avatar">
-                            <a href="{% url 'users:profile_user' post.author.username %}" style="color: inherit; text-decoration: none;">{{ post.author.username }}</a>
+                            <a href="{% url 'users:profile_user' post.author.username %}" class="link-inherit">{{ post.author.username }}</a>
                         </div>
                     </div>
                         <div class="post-meta-item">
@@ -329,7 +61,7 @@
 
             <footer class="post-footer">
                 <div>
-                    <small>本文由 <a href="{% url 'users:profile_user' post.author.username %}" style="color: var(--accent); text-decoration: none; font-weight: bold;">{{ post.author.username }}</a> 发布</small>
+                    <small>本文由 <a href="{% url 'users:profile_user' post.author.username %}" class="accent-link">{{ post.author.username }}</a> 发布</small>
                 </div>
                 <div class="post-actions">
                     <a href="{% url 'index' %}" class="btn">← 返回首页</a>
@@ -341,20 +73,33 @@
             <h2>评论</h2>
 
             <!-- 新评论表单 -->
-            <div class="card" style="margin-bottom:16px; padding:16px; background:#fff; border:1px solid var(--border); border-radius:8px;">
+            {% if user %}
+            <div class="card">
                 <form method="post" action="{% url 'posting:add_comment' post.id %}">
                     {% csrf_token %}
                     <input type="hidden" name="parent_id" value="">
                     <div class="form-group">
                         <label for="comment-content">写下你的评论 (支持 Markdown)</label>
-                        <textarea id="comment-content" name="content" rows="6" style="width:100%; padding:8px; border:1px solid #e6e9ef; border-radius:6px;"></textarea>
+                        <textarea id="comment-content" name="content" rows="6" placeholder="在此输入评论，支持 Markdown 格式..."></textarea>
                     </div>
-                    <div style="margin-top:8px; display:flex; gap:8px;">
-                        <button type="submit" class="btn" style="background:var(--accent); color:#fff;">发表评论</button>
-                        <a href="#" class="btn" style="background:#f0f4f8; color:var(--accent);">清空</a>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">发表评论</button>
+                        <button type="button" id="btn-clear-comment" class="btn btn-secondary">清空</button>
                     </div>
                 </form>
             </div>
+            {% else %}
+            <div class="card card-body text-center">
+                <div class="meta mt-16">
+                    <svg class="warning-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <p class="lead">请登录后发表评论</p>
+                    <p class="meta">想参与讨论？<a href="{% url 'users:login' %}?next={{ request.path }}" class="accent-link">立即登录</a> 或 <a href="{% url 'users:register' %}?next={{ request.path }}" class="accent-link">注册账号</a></p>
+                </div>
+            </div>
+            {% endif %}
 
             <!-- 已有评论（显示多级） -->
             <div id="comments-list">
@@ -385,6 +130,15 @@
                 });
             }
 
+            // 清空按钮功能
+            var clearBtn = document.getElementById('btn-clear-comment');
+            if (clearBtn && mainEditor) {
+                clearBtn.addEventListener('click', function(e){
+                    e.preventDefault();
+                    mainEditor.value('');
+                });
+            }
+
             // 回复按钮：显示对应回复表单并延迟初始化编辑器
             function bindReplyButtons(root){
                 (root || document).querySelectorAll('.btn-reply').forEach(function(btn){
@@ -394,19 +148,29 @@
                         var cid = this.getAttribute('data-comment-id');
                         var container = document.getElementById('reply-form-' + cid);
                         if (!container) return;
-                        if (container.style.display === 'none' || container.style.display === '') {
+                        
+                        var isHidden = container.style.display === 'none' || container.style.display === '';
+                        if (isHidden) {
                             container.style.display = 'block';
                             // 初始化 SimpleMDE 仅一次
                             if (!container.dataset.inited) {
-                                var ta = container.querySelector('textarea');
-                                if (ta) {
-                                    var inst = new SimpleMDE({ element: ta, spellChecker: false, placeholder: '在此输入回复，支持 Markdown...' });
-                                    // 保存实例到 DOM 节点以便提交时读取
-                                    try { ta.simplemde = inst; } catch (e) {}
-                                }
-                                container.dataset.inited = '1';
+                                setTimeout(function() {
+                                    var ta = container.querySelector('textarea');
+                                    if (ta && !ta.simplemde) {
+                                        var inst = new SimpleMDE({ 
+                                            element: ta, 
+                                            spellChecker: false, 
+                                            placeholder: '在此输入回复，支持 Markdown...',
+                                            autoDownloadFontAwesome: false
+                                        });
+                                        ta.simplemde = inst;
+                                    }
+                                }, 100);
                             }
-                            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            container.dataset.inited = '1';
+                            setTimeout(function() {
+                                container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 200);
                         } else {
                             container.style.display = 'none';
                         }
@@ -421,7 +185,18 @@
                     btn.addEventListener('click', function(){
                         var cid = this.getAttribute('data-comment-id');
                         var container = document.getElementById('reply-form-' + cid);
-                        if (container) container.style.display = 'none';
+                        if (container) {
+                            container.style.display = 'none';
+                            // 清空回复表单
+                            var ta = container.querySelector('textarea');
+                            if (ta) {
+                                if (ta.simplemde && typeof ta.simplemde.value === 'function') {
+                                    ta.simplemde.value('');
+                                } else {
+                                    ta.value = '';
+                                }
+                            }
+                        }
                     });
                     btn.dataset.bound = '1';
                 });
@@ -429,15 +204,6 @@
 
             bindReplyButtons(document);
             bindCancelButtons(document);
-
-            // 清空主评论
-            var clearLink = document.querySelector('.comments-section .card a');
-            if (clearLink && mainEditor) {
-                clearLink.addEventListener('click', function(e){
-                    e.preventDefault();
-                    mainEditor.value('');
-                });
-            }
 
             // 表单提交（事件委托）：支持 AJAX 提交并局部插入新评论
             var commentsSection = document.querySelector('.comments-section');
@@ -456,7 +222,7 @@
                         var val = null;
                         if (ta.simplemde && typeof ta.simplemde.value === 'function') {
                             val = ta.simplemde.value();
-                        } else if (ta.id === 'comment-content' && mainEditor) {
+                        } else if (ta.id === 'comment-content' && mainEditor && typeof mainEditor.value === 'function') {
                             val = mainEditor.value();
                         } else {
                             val = ta.value;
@@ -476,6 +242,7 @@
                     }).then(function(data){
                         if (!data || !data.ok) {
                             console.error('提交评论失败', data);
+                            alert('评论提交失败，请重试');
                             return;
                         }
 
@@ -486,6 +253,10 @@
                                 var replies = parent.querySelector('.replies-container');
                                 if (replies) {
                                     replies.insertAdjacentHTML('beforeend', data.html);
+                                    // 为新插入的回复绑定按钮
+                                    bindReplyButtons(replies);
+                                    bindCancelButtons(replies);
+                                    bindDeleteButtons(replies);
                                 }
                             }
                             // 隐藏并清空回复表单
@@ -494,27 +265,74 @@
                                 replyForm.style.display = 'none';
                                 var rta = replyForm.querySelector('textarea');
                                 if (rta) {
-                                    if (rta.simplemde && typeof rta.simplemde.value === 'function') rta.simplemde.value('');
-                                    else rta.value = '';
+                                    if (rta.simplemde && typeof rta.simplemde.value === 'function') {
+                                        rta.simplemde.value('');
+                                    } else {
+                                        rta.value = '';
+                                    }
                                 }
                             }
                         } else {
                             // 顶层评论，插入到 comments-list 顶部
                             var list = document.getElementById('comments-list');
-                            if (list) list.insertAdjacentHTML('afterbegin', data.html);
+                            if (list) {
+                                list.insertAdjacentHTML('afterbegin', data.html);
+                                // 为新插入的评论绑定按钮
+                                var newComment = document.getElementById('comment-' + data.comment_id);
+                                if (newComment) {
+                                    bindReplyButtons(newComment);
+                                    bindCancelButtons(newComment);
+                                    bindDeleteButtons(newComment);
+                                }
+                            }
                             // 清空主编辑器
-                            if (mainEditor) mainEditor.value('');
+                            if (mainEditor && typeof mainEditor.value === 'function') {
+                                mainEditor.value('');
+                            }
                         }
-
-                        // 绑定新插入部分的按钮
-                        var containerRoot = document.getElementById('comment-' + (data.comment_id || '')) || document;
-                        bindReplyButtons(containerRoot);
-                        bindCancelButtons(containerRoot);
                     }).catch(function(err){
                         console.error('AJAX 错误', err);
+                        alert('提交失败，请重试');
                     });
                 });
             }
+
+            // 绑定删除评论按钮
+            function bindDeleteButtons(root){
+                (root || document).querySelectorAll('.btn-delete-comment').forEach(function(btn){
+                    if (btn.dataset.bound) return;
+                    btn.addEventListener('click', function(e){
+                        e.preventDefault();
+                        var cid = this.getAttribute('data-comment-id');
+                        if (!confirm('确定要删除此评论吗？此操作不可恢复。')) return;
+                        
+                        // AJAX 删除评论
+                        fetch('/post/comment/' + cid + '/delete/', {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRFToken': (document.querySelector('input[name=csrfmiddlewaretoken]')||{}).value || ''
+                            }
+                        }).then(function(res){
+                            return res.json();
+                        }).then(function(data){
+                            if (data.ok) {
+                                // 移除评论元素
+                                var commentEl = document.getElementById('comment-' + cid);
+                                if (commentEl) commentEl.remove();
+                            } else {
+                                alert(data.error || '删除失败');
+                            }
+                        }).catch(function(err){
+                            console.error('删除错误', err);
+                            alert('删除失败，请重试');
+                        });
+                    });
+                    btn.dataset.bound = '1';
+                });
+            }
+
+            bindDeleteButtons(document);
         });
     </script>
 </body>

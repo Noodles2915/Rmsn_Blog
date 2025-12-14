@@ -4,72 +4,85 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>编辑个人信息 - 一息博客</title>
+    {% load static %}
     <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
-    <style>
-        :root{--bg:#f6f7fb;--card:#ffffff;--accent:#2b6cb0;--accent-hover:#1e4f7a;--muted:#6b7280;--danger:#ef4444;--border:#e6e9ef}
-        html,body{height:100%;margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial}
-        .container{max-width:800px;margin:32px auto;padding:0 24px}
-        .card{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 1px 2px rgba(16,24,40,0.03);overflow:hidden}
-        .card-header{padding:20px;border-bottom:1px solid var(--border)}
-        .card-body{padding:24px}
-        .avatar-preview{width:80px;height:80px;border-radius:8px;object-fit:cover;border:2px solid var(--accent)}
-        .file-input-wrapper{display:flex;align-items:center;gap:16px}
-        .form-actions{display:flex;gap:12px;margin-top:28px;padding-top:20px;border-top:1px solid var(--border)}
-        .btn{display:inline-block;padding:8px 12px;border-radius:6px;border:1px solid transparent;text-decoration:none;cursor:pointer}
-        .btn-primary{background:var(--accent);color:#fff}
-        .btn-secondary{background:#f3f4f6;color:#111;border:1px solid #e5e7eb}
-        .help-text{color:var(--muted);font-size:13px;margin-top:6px}
-        .form-group{margin-bottom:16px}
-        input[type="text"],input[type="email"],textarea{width:100%;padding:8px;border:1px solid var(--border);border-radius:6px}
-        ul.error-list{color:var(--danger);margin:6px 0 0;padding-left:18px}
-        @media (max-width:640px){.form-actions{flex-direction:column}.file-input-wrapper{flex-direction:column;align-items:flex-start}}
-    </style>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
 </head>
 <body>
-<div class="container">
-    <div class="card">
-        <div class="card-header"><h2>编辑个人信息</h2></div>
-        <form method="post" enctype="multipart/form-data" class="card-body">
-            {% csrf_token %}
+    <header>
+        <div class="brand">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="24" height="24" rx="5" fill="#2b6cb0"/>
+                <text x="50%" y="55%" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="12" font-weight="700">RB</text>
+            </svg>
+            <h1>一息博客</h1>
+        </div>
 
-            <div class="form-section">
-                <div class="form-section-title">基本信息</div>
-                <div class="form-group">
-                    <label for="username">用户名</label>
-                    <input type="text" id="username" value="{{ user.username }}" disabled>
-                    <div class="help-text">用户名无法修改</div>
+        <div class="header-right">
+            <a href="{% url 'users:dashboard' %}" class="back-btn">← 返回仪表盘</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header"><h2>编辑个人信息</h2></div>
+            <form method="post" enctype="multipart/form-data" class="card-body">
+                {% csrf_token %}
+
+                <div class="form-section">
+                    <div class="form-section-title">邮箱地址</div>
+                    <div class="form-group">
+                        <label>当前邮箱</label>
+                        <input type="email" value="{{ user.email }}" readonly class="form-input-readonly">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_email">新邮箱</label>
+                        {% if form.email %}
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <ul class="error-list">{% for error in form.email.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                            {% endif %}
+                        {% else %}
+                            <input type="email" id="id_email" placeholder="留空则不修改">
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group" id="verification-section" style="display: none;">
+                        <label for="id_verification_code">邮箱验证码</label>
+                        <div class="flex-row">
+                            <input type="text" name="verification_code" id="id_verification_code" maxlength="6" placeholder="6位验证码" class="vcode-input">
+                            <button type="button" id="send-email-vcode" class="btn">发送验证码</button>
+                        </div>
+                        <div id="vcode-msg" class="vcode-msg"></div>
+                        <div class="help-text">验证码将发送到新邮箱地址</div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="email">邮箱地址</label>
-                    {% if form.email %}{{ form.email }}{% else %}<input type="email" id="email" value="{{ user.email }}" readonly>{% endif %}
-                </div>
-            </div>
 
             <div class="form-section">
                 <div class="form-section-title">头像</div>
                 <div class="form-group file-input">
                     <div class="file-input-wrapper">
                         <img id="avatar-preview" src="{{ user.avatar_url }}" alt="{{ user.username }}" class="avatar-preview">
-                        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;">
-                            <label for="id_avatar" class="btn btn-primary" style="padding:8px 12px;border-radius:6px;">选择新头像</label>
+                        <div class="file-input-actions">
+                            <label for="id_avatar" class="btn btn-primary">选择新头像</label>
                             {% if user.avatar %}
-                                <label class="custom-clear-checkbox" for="id_avatar-clear" style="margin-top:0;">
+                                <label class="custom-clear-checkbox" for="id_avatar-clear">
                                     <input type="checkbox" name="{{ form.avatar.name }}-clear" id="id_avatar-clear"><span>清除头像</span>
                                 </label>
                             {% endif %}
                         </div>
                     </div>
-                    <input type="file" name="{{ form.avatar.name }}" id="id_avatar" accept="image/*" style="display:none;">
+                    <input type="file" name="{{ form.avatar.name }}" id="id_avatar" accept="image/*" class="hidden">
                     <div class="help-text">支持 JPG、PNG 格式，大小不超过 5MB。可裁剪后保存。</div>
                     {% if form.avatar.errors %}
                         <ul class="error-list">{% for error in form.avatar.errors %}<li>{{ error }}</li>{% endfor %}</ul>
                     {% endif %}
 
-                    <div id="cropper-modal" style="display:none;position:fixed;z-index:9999;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;">
-                        <div style="background:#fff;padding:24px;border-radius:12px;max-width:90vw;max-height:90vh;">
-                            <img id="cropper-image" style="max-width:400px;max-height:400px;display:block;margin:auto;">
-                            <div style="text-align:center;margin-top:16px;">
+                    <div id="cropper-modal">
+                        <div class="modal-inner">
+                            <img id="cropper-image" class="cropper-image">
+                            <div class="text-center mt-16">
                                 <button type="button" id="crop-confirm" class="btn btn-primary">裁剪并预览</button>
                                 <button type="button" id="crop-cancel" class="btn btn-secondary">取消</button>
                             </div>
@@ -82,17 +95,17 @@
                 <div class="form-section-title">个人背景</div>
                 <div class="form-group file-input">
                     <div class="file-input-wrapper">
-                        <div id="bg-preview" style="width:240px;height:100px;border-radius:8px;border:2px solid var(--border);background: {{ user.bg_css|safe }};"></div>
-                        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;">
-                            <label for="id_bg" class="btn btn-primary" style="padding:8px 12px;border-radius:6px;">选择背景图片</label>
+                        <div id="bg-preview" class="bg-preview" style="background: {{ user.bg_css|safe }};"></div>
+                        <div class="file-input-actions">
+                            <label for="id_bg" class="btn btn-primary">选择背景图片</label>
                             {% if user.bg %}
-                                <label class="custom-clear-checkbox" for="id_bg-clear" style="margin-top:0;">
+                                <label class="custom-clear-checkbox" for="id_bg-clear">
                                     <input type="checkbox" name="{{ form.bg.name }}-clear" id="id_bg-clear"><span>清除背景</span>
                                 </label>
                             {% endif %}
                         </div>
                     </div>
-                    <input type="file" name="{{ form.bg.name }}" id="id_bg" accept="image/*" style="display:none;">
+                    <input type="file" name="{{ form.bg.name }}" id="id_bg" accept="image/*" class="hidden">
                     <div class="help-text">可选背景图片，默认为系统渐变背景。建议宽度 &gt;= 1200px。</div>
                     {% if form.bg.errors %}
                         <ul class="error-list">{% for error in form.bg.errors %}<li>{{ error }}</li>{% endfor %}</ul>
@@ -124,13 +137,142 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // 邮箱变化检测和验证码逻辑
+    const emailInput = document.querySelector('input[name="email"]') || document.getElementById('email');
+    const originalEmail = '{{ user.email }}';
+    const verificationSection = document.getElementById('verification-section');
+    const sendVcodeBtn = document.getElementById('send-email-vcode');
+    const vcodeInput = document.getElementById('id_verification_code');
+    const vcodeMsg = document.getElementById('vcode-msg');
+    
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    function storageKeyFor(email) {
+        return 'vcode_cooldown_' + email;
+    }
+
+    function startCooldown(seconds, email) {
+        const key = storageKeyFor(email);
+        const expiry = Date.now() + seconds * 1000;
+        try { localStorage.setItem(key, String(expiry)); } catch (e) {}
+
+        sendVcodeBtn.disabled = true;
+        let t = seconds;
+        sendVcodeBtn.textContent = `已发送(${t}s)`;
+        const iv = setInterval(() => {
+            t -= 1;
+            if (t <= 0) {
+                clearInterval(iv);
+                sendVcodeBtn.disabled = false;
+                sendVcodeBtn.textContent = '发送验证码';
+            } else {
+                sendVcodeBtn.textContent = `已发送(${t}s)`;
+            }
+        }, 1000);
+    }
+
+    function checkCooldown(email) {
+        const key = storageKeyFor(email);
+        const expiry = localStorage.getItem(key);
+        if (!expiry) return -1;
+        const remaining = Math.ceil((parseInt(expiry) - Date.now()) / 1000);
+        return remaining > 0 ? remaining : -1;
+    }
+
+    // 监听邮箱输入变化
+    if (emailInput) {
+        emailInput.addEventListener('change', function() {
+            if (this.value !== originalEmail) {
+                verificationSection.style.display = 'block';
+                vcodeInput.value = '';
+                vcodeMsg.textContent = '';
+            } else {
+                verificationSection.style.display = 'none';
+                vcodeInput.value = '';
+                vcodeMsg.textContent = '';
+            }
+        });
+    }
+
+    // 发送验证码
+    if (sendVcodeBtn) {
+        sendVcodeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const email = emailInput ? emailInput.value : '';
+            if (!email) {
+                vcodeMsg.textContent = '请输入邮箱地址';
+                vcodeMsg.style.color = '#ef4444';
+                return;
+            }
+
+            const remaining = checkCooldown(email);
+            if (remaining > 0) {
+                vcodeMsg.textContent = `请等待 ${remaining} 秒后重试`;
+                vcodeMsg.style.color = '#ef4444';
+                return;
+            }
+
+            sendVcodeBtn.disabled = true;
+            sendVcodeBtn.textContent = '发送中...';
+
+            fetch('{% url "users:send_vcode" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: 'email=' + encodeURIComponent(email),
+            }).then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    vcodeMsg.textContent = '验证码已发送';
+                    vcodeMsg.style.color = '#10b981';
+                    startCooldown(60, email);
+                } else {
+                    vcodeMsg.textContent = data.error || '发送失败，请重试';
+                    vcodeMsg.style.color = '#ef4444';
+                    sendVcodeBtn.disabled = false;
+                    sendVcodeBtn.textContent = '发送验证码';
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                vcodeMsg.textContent = '网络错误，请重试';
+                vcodeMsg.style.color = '#ef4444';
+                sendVcodeBtn.disabled = false;
+                sendVcodeBtn.textContent = '发送验证码';
+            });
+        });
+    }
+
+    // 头像裁剪逻辑
     var cropper = null;
     var avatarInput = document.getElementById('id_avatar');
     var avatarPreview = document.getElementById('avatar-preview');
     var cropperImage = document.getElementById('cropper-image');
     var cropperModal = document.getElementById('cropper-modal');
+    var cropConfirmBtn = document.getElementById('crop-confirm');
+    var cropCancelBtn = document.getElementById('crop-cancel');
 
-    function openCropperWithDataURL(dataURL){
+    function initCropper() {
+        if (cropper) {
+            cropper.destroy();
+        }
+        cropper = new Cropper(cropperImage, {
+            aspectRatio: 1,
+            viewMode: 1,
+            autoCropArea: 1,
+            responsive: true,
+            guides: true,
+            center: true
+        });
+    }
+
+    function openCropperWithDataURL(dataURL) {
         cropperImage.src = dataURL;
         cropperModal.style.display = 'flex';
     }
@@ -149,27 +291,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (cropperImage) {
         cropperImage.addEventListener('load', function () {
-            if (cropper) cropper.destroy();
-            cropper = new Cropper(cropperImage, { aspectRatio: 1, viewMode: 1, autoCropArea: 1 });
+            initCropper();
         });
     }
 
-    document.getElementById('crop-cancel') && document.getElementById('crop-cancel').addEventListener('click', function () {
-        cropperModal.style.display = 'none';
-        if (cropper) { cropper.destroy(); cropper = null; }
-    });
-
-    document.getElementById('crop-confirm') && document.getElementById('crop-confirm').addEventListener('click', function () {
-        if (!cropper) return;
-        var canvas = cropper.getCroppedCanvas({ width: 256, height: 256 });
-        canvas.toBlob(function (blob) {
-            var file = new File([blob], 'avatar.png', { type: 'image/png' });
-            var dt = new DataTransfer(); dt.items.add(file); avatarInput.files = dt.files;
-            avatarPreview.src = canvas.toDataURL('image/png');
+    if (cropCancelBtn) {
+        cropCancelBtn.addEventListener('click', function () {
             cropperModal.style.display = 'none';
-            cropper.destroy(); cropper = null;
-        }, 'image/png');
-    });
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+        });
+    }
+
+    if (cropConfirmBtn) {
+        cropConfirmBtn.addEventListener('click', function () {
+            if (!cropper) return;
+            var canvas = cropper.getCroppedCanvas({ width: 256, height: 256 });
+            canvas.toBlob(function (blob) {
+                var file = new File([blob], 'avatar.png', { type: 'image/png' });
+                var dt = new DataTransfer();
+                dt.items.add(file);
+                avatarInput.files = dt.files;
+                avatarPreview.src = canvas.toDataURL('image/png');
+                cropperModal.style.display = 'none';
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+            }, 'image/png');
+        });
+    }
 
     var bgInput = document.getElementById('id_bg');
     var bgPreview = document.getElementById('bg-preview');
@@ -188,5 +341,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
+
+    <footer>
+        <div>© 2025 一息博客 • Django 出品</div>
+    </footer>
 </body>
 </html>

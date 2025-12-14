@@ -85,13 +85,20 @@ class LoginForm(Form):
 class ProfileEditForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['email', 'avatar', 'bg']
+        fields = ['email', 'avatar', 'bg', 'bio']
         labels = {
             'email': '邮箱',
             'avatar': '头像',
+            'bg': '背景图片',
+            'bio': '个人简介',
         }
         widgets = {
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'bio': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': '输入个人简介，最多 500 个字符',
+            }),
         }
 
     def clean_avatar(self):

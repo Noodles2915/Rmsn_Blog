@@ -1,16 +1,5 @@
 # 没错，我闲的没事又重新实现了一次用户模型，因为我疯了。
-try:
-    from utils.paths import avatar_upload_path, bg_upload_path
-except Exception:
-    # 如果直接导入失败（例如包路径问题），将项目根目录加入 sys.path 后重试
-    import os
-    import sys
-
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if BASE_DIR not in sys.path:
-        sys.path.insert(0, BASE_DIR)
-
-    from utils.paths import avatar_upload_path, bg_upload_path
+from utils.paths import avatar_upload_path, bg_upload_path
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
@@ -23,6 +12,7 @@ class User(models.Model):
     password = models.CharField(max_length=128)
     salt = models.CharField(max_length=32)
     date_joined = models.DateTimeField(auto_now_add=True)
+    bio = models.CharField(max_length=500, blank=True, default='这个用户很懒，还没有设置个人简介。')
     avatar = models.ImageField(upload_to=avatar_upload_path, null=True, blank=True)
     bg = models.ImageField(upload_to=bg_upload_path, null=True, blank=True)
 

@@ -1,5 +1,7 @@
 # RmsnBlog
 
+中文版: [中文](README.md)
+
 English documentation — A minimal Django-based blog example. This project depends only on Django (no other third-party packages).
 
 Project status: Educational / example. Useful to learn Django project structure, basic user management and simple post publishing.
@@ -72,8 +74,6 @@ Repository file index (quick reference):
 - `posting/` — blog app (models, views, admin, templates).
 - `users/` — user app (forms, views, urls).
 - `templates/` — global templates.
-
-For Chinese readers, see: [readme.md](readme.md)
 
 ## Rate limiting (verification emails)
 

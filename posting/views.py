@@ -19,10 +19,21 @@ def new_post(request):
 
     if request.method == 'POST':
         form = PostForm(request.POST)
+        # 手动获取内容
+        raw_md = request.POST.get('content', '').strip()
+        
+        if not raw_md:
+            # content 为空，重新渲染表单并显示错误
+            form.add_error('content', '文章内容不能为空')
+            tags_raw = request.POST.get('tags', '')
+            tags_list = [t.strip() for t in tags_raw.split(',') if t.strip()]
+            return render(request, 'new_post.html', {'form': form, 'initial_tags_json': json.dumps(tags_list)})
+        
         if form.is_valid():
             post = form.save(commit=False)
+            post.content_raw = raw_md
             # 将 Markdown 渲染为 HTML 并清理 XSS
-            html = markdownify(form.cleaned_data['content'])
+            html = markdownify(raw_md)
             cleaned = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
             post.content = cleaned
             post.author = user
@@ -62,9 +73,22 @@ def edit_post(request, post_id):
     
     if request.method == 'POST':
         form = PostForm(request.POST, instance=post)
+        # 手动获取内容
+        raw_md = request.POST.get('content', '').strip()
+        
+        if not raw_md:
+            # content 为空，重新渲染表单并显示错误
+            form.add_error('content', '文章内容不能为空')
+            tags_raw = request.POST.get('tags', '')
+            tags_list = [t.strip() for t in tags_raw.split(',') if t.strip()]
+            return render(request, 'edit_post.html', {'post': post, 'form': form, 'initial_tags_json': json.dumps(tags_list)})
+        
         if form.is_valid():
             post = form.save(commit=False)
-            html = markdownify(form.cleaned_data['content'])
+            # 获取表单中的 content（原始 Markdown）
+            post.content_raw = raw_md
+            # 将 Markdown 渲染为 HTML 并清理 XSS
+            html = markdownify(raw_md)
             cleaned = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
             post.content = cleaned
             post.save()
@@ -107,13 +131,22 @@ def view_post(request, post_id):
     is_updated = post.updated_at != post.created_at
 
     # 评论与文章为独立模型时，不应依赖反向属性，改为直接查询 Comment
-    comments = Comment.objects.filter(post=post, level=0).order_by('-created_at').prefetch_related('replies')
+    # 查询顶级评论并预加载所有相关数据
+    comments = Comment.objects.filter(post=post, level=0).order_by('-created_at').prefetch_related(
+        'author',
+        'replies',
+        'replies__author'
+    )
+    
+    # 获取当前用户
+    user = get_current_user(request)
 
     context = {
         'post': post,
         'comments': comments,
         'tags': tags,
         'is_updated': is_updated,
+        'user': user,
     }
     return render(request, 'post_detail.html', context)
 
@@ -136,14 +169,18 @@ def add_comment(request, post_id):
     level = 0
     if parent_id:
         try:
-            parent = Comment.objects.get(id=int(parent_id), post=post)
+            parent = Comment.objects.get(id=parent_id, post=post)
             level = parent.level + 1
-        except Exception:
+        except (Comment.DoesNotExist, ValueError):
             parent = None
             level = 0
 
     user = get_current_user(request)
-    author = user.username if user else request.POST.get('author', '匿名')
+    if not user:
+        # 未登录用户不能评论
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'ok': False, 'error': '请先登录后再评论'}, status=401)
+        return redirect('users:login')
 
     raw_md = form.cleaned_data['content']
     html = markdownify(raw_md)
@@ -153,14 +190,14 @@ def add_comment(request, post_id):
         post=post,
         parent=parent,
         level=level,
-        author=author,
+        author=user,
         content=cleaned,
     )
 
     # 支持 AJAX：返回渲染后的 HTML 片段以便局部刷新
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        rendered = render_to_string('_comment.html', {'comment': comment, 'offset': level * 24, 'post': post}, request=request)
-        return JsonResponse({'ok': True, 'html': rendered, 'comment_id': comment.id, 'parent_id': parent.id if parent else None})
+        rendered = render_to_string('_comment.html', {'comment': comment, 'post': post}, request=request)
+        return JsonResponse({'ok': True, 'html': rendered, 'comment_id': str(comment.id), 'parent_id': str(parent.id) if parent else None})
 
     return redirect('posting:view_post', post_id=post_id)
 
@@ -194,3 +231,31 @@ def tags_autocomplete(request):
         qs = Tag.objects.all().order_by('name')[:20]
     results = [t.name for t in qs]
     return JsonResponse({'ok': True, 'results': results})
+
+
+def delete_comment(request, comment_id):
+    """删除评论 - 评论作者或文章作者可以删除"""
+    user = get_current_user(request)
+    if not user:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'ok': False, 'error': '请先登录'}, status=401)
+        return redirect('users:login')
+    
+    comment = get_object_or_404(Comment, id=comment_id)
+    post = comment.post
+    
+    # 检查权限：评论作者或文章作者可以删除
+    if comment.author != user and post.author != user:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'ok': False, 'error': '无权删除此评论'}, status=403)
+        return redirect('posting:view_post', post_id=post.id)
+    
+    # 删除评论（级联删除所有回复）
+    comment.delete()
+    
+    # AJAX 请求返回 JSON
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'ok': True, 'comment_id': comment_id})
+    
+    # 普通请求重定向回文章页
+    return redirect('posting:view_post', post_id=post.id)

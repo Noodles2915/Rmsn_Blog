@@ -1,307 +1,11 @@
+{% load static %}
 <!doctype html>
 <html lang="zh-cn">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>编辑文章 - 一息博客</title>
-    <link href="https://cdn.jsdelivr.net/npm/simplemde@1.11.2/dist/simplemde.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/simplemde@1.11.2/dist/simplemde.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg: #f6f7fb;
-            --card: #ffffff;
-            --accent: #2b6cb0;
-            --accent-hover: #1e4f7a;
-            --muted: #6b7280;
-            --danger: #ef4444;
-            --border: #e6e9ef;
-        }
-
-        body {
-            font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: var(--bg);
-            color: #111;
-        }
-
-        header {
-            background: linear-gradient(90deg, #fff 0%, #f8fafc 100%);
-            border-bottom: 1px solid var(--border);
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .brand h1 {
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .back-btn {
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .back-btn:hover {
-            color: var(--accent-hover);
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 24px auto;
-            padding: 0 24px;
-        }
-
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
-            background: #f9fafb;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .card-header h2 {
-            font-size: 18px;
-            margin: 0;
-        }
-
-        .card-body {
-            padding: 24px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 14px;
-            transition: border-color 0.2s;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
-        }
-
-        .form-group.editor-group {
-            margin-bottom: 24px;
-        }
-
-        .editor-group .CodeMirror {
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            min-height: 400px;
-        }
-
-        .tags-input-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 8px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            min-height: 40px;
-            align-items: center;
-        }
-
-        .tag {
-            background: var(--accent);
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-        }
-
-        .tag-remove {
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .tags-input-container input {
-            border: none;
-            padding: 0;
-            flex: 1;
-            min-width: 100px;
-            font-size: 14px;
-        }
-
-        .tags-input-container input:focus {
-            outline: none;
-            box-shadow: none;
-        }
-
-        .help-text {
-            font-size: 12px;
-            color: var(--muted);
-            margin-top: 6px;
-        }
-
-        .error-list {
-            color: var(--danger);
-            font-size: 12px;
-            margin-top: 6px;
-            list-style: none;
-        }
-
-        .error-list li {
-            margin-bottom: 4px;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 28px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: #fff;
-            flex: 1;
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-hover);
-        }
-
-        .btn-secondary {
-            background: #f0f4f8;
-            color: var(--accent);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background: #e8ecf1;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: #fff;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        .form-section {
-            margin-bottom: 24px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .form-section:last-of-type {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .form-section-title {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            color: #111;
-        }
-
-        .two-column {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .post-meta {
-            background: #f9fafb;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            color: var(--muted);
-            margin-bottom: 16px;
-        }
-
-        footer {
-            max-width: 1000px;
-            margin: 40px auto;
-            text-align: center;
-            color: var(--muted);
-            font-size: 13px;
-            padding: 0 24px;
-        }
-
-        @media (max-width: 640px) {
-            .form-actions {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-            }
-
-            .two-column {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
 </head>
 <body>
     <header>
@@ -338,19 +42,8 @@
                     <div class="form-section-title">文章信息</div>
 
                     <div class="form-group">
-                        <label for="title">文章标题 *</label>
-                        {% if form.title %}
-                            {{ form.title }}
-                            {% if form.title.errors %}
-                                <ul class="error-list">
-                                    {% for error in form.title.errors %}
-                                        <li>{{ error }}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                        {% else %}
-                            <input type="text" id="title" name="title" value="{{ post.title }}" placeholder="请输入文章标题" required>
-                        {% endif %}
+                        <label for="id_title">文章标题 *</label>
+                        <input type="text" id="id_title" name="title" value="{{ post.title }}" placeholder="请输入文章标题">
                     </div>
 
                     <div class="two-column">
@@ -384,27 +77,22 @@
                 <div class="form-section">
                     <div class="form-section-title">文章内容</div>
 
-                    <div class="form-group editor-group">
-                        <label for="content">文章内容 * (Markdown 格式)</label>
-                        {% if form.content %}
-                            {{ form.content }}
-                            {% if form.content.errors %}
-                                <ul class="error-list">
-                                    {% for error in form.content.errors %}
-                                        <li>{{ error }}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                        {% else %}
-                            <textarea id="content" name="content" placeholder="在此输入文章内容，支持 Markdown 格式" required>{{ post.content }}</textarea>
-                        {% endif %}
+                    <div class="markdown-editor-group">
+                        <label for="id_content">文章内容 * (Markdown 格式)</label>
+                        <div class="markdown-editor-container">
+                            <textarea id="id_content" name="content" class="markdown-textarea" placeholder="在此输入文章内容，支持 Markdown 格式...">{{ post.content_raw }}</textarea>
+                            <div id="markdown-preview" class="markdown-preview">
+                                <div class="preview-label">预览</div>
+                                <div id="preview-content" class="preview-content"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- 操作按钮 -->
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary" name="action" value="save">保存修改</button>
-                    <button type="submit" class="btn btn-secondary" name="action" value="draft" style="border: none; color: #111;">保存为草稿</button>
+                    <button type="submit" class="btn btn-secondary" name="action" value="draft">保存为草稿</button>
                     <a href="{% url 'users:dashboard' %}" class="btn btn-secondary">取消</a>
                 </div>
             </form>
@@ -414,146 +102,120 @@
     <footer>
         <div>© 2025 一息博客 • Django 出品</div>
     </footer>
-
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
-        // 初始化 Markdown 编辑器
-        const simplemde = new SimpleMDE({
-            element: document.getElementById("content"),
-            spellChecker: false,
-            placeholder: "在此输入文章内容，支持 Markdown 格式...",
-            toolbar: [
-                "bold", "italic", "heading", "|",
-                "quote", "unordered-list", "ordered-list", "|",
-                "link", "image", "|",
-                "preview", "side-by-side", "fullscreen", "|",
-                "guide"
-            ]
-        });
-
-        // 标签管理（初始标签由视图通过 `initial_tags_json` 提供）
-        const tagsContainer = document.querySelector('.tags-input-container');
-        const tagsInput = document.getElementById('tags-input');
-        const tagsHidden = document.getElementById('tags');
-        let tags = {{ initial_tags_json|safe }} || [];
-
-        // 若隐藏字段被设置（例如来自外部回显），优先使用隐藏字段的值
-        if (tagsHidden && tagsHidden.value) {
-            tags = tagsHidden.value.split(',').map(t => t.trim()).filter(Boolean);
-        }
-
-        if (tagsInput) {
-            tagsInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const tag = tagsInput.value.trim();
-                    if (tag && !tags.includes(tag)) {
-                        tags.push(tag);
-                        renderTags();
-                        tagsInput.value = '';
-                        updateTagsHidden();
-                    }
+        document.addEventListener('DOMContentLoaded', function(){
+            // 实时预览功能
+            var contentTextarea = document.getElementById('id_content');
+            var previewContent = document.getElementById('preview-content');
+            
+            if (contentTextarea && previewContent) {
+                // 初始渲染
+                function updatePreview() {
+                    var markdown = contentTextarea.value;
+                    previewContent.innerHTML = marked.parse(markdown);
                 }
-            });
-        }
+                
+                // 监听输入事件
+                contentTextarea.addEventListener('input', updatePreview);
+                
+                // 初始化预览
+                updatePreview();
+            }
+            
+            // 表单提交处理 - 简单的验证，不用复杂的编辑器
+            var form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e){
+                    var titleInput = document.getElementById('id_title');
+                    var contentTextarea = document.getElementById('id_content');
+                    var contentValue = contentTextarea ? contentTextarea.value : '';
+                    
+                    // 验证标题
+                    if (!titleInput || !titleInput.value || titleInput.value.trim() === '') {
+                        e.preventDefault();
+                        alert('文章标题不能为空');
+                        titleInput.focus();
+                        return false;
+                    }
+                    
+                    // 验证内容
+                    if (!contentValue || contentValue.trim() === '') {
+                        e.preventDefault();
+                        alert('文章内容不能为空');
+                        contentTextarea.focus();
+                        return false;
+                    }
+                    
+                    return true;
+                });
+            }
 
-        function renderTags() {
-            const tagElements = tags.map(tag => `
-                <div class="tag">
-                    <span>${tag}</span>
-                    <span class="tag-remove" onclick="removeTag('${tag}')">×</span>
-                </div>
-            `).join('');
+            // 标签管理
+            var tagsContainer = document.querySelector('.tags-input-container');
+            var tagsHidden = document.getElementById('tags');
+            var tags = {{ initial_tags_json|safe }} || [];
 
-            tagsContainer.innerHTML = tagElements + '<input type="text" id="tags-input" placeholder="输入标签后按回车">';
-            document.getElementById('tags-input').addEventListener('keypress', handleTagInput);
-        }
+            // 若隐藏字段被设置，优先使用隐藏字段的值
+            if (tagsHidden && tagsHidden.value) {
+                tags = tagsHidden.value.split(',').map(function(t) { return t.trim(); }).filter(Boolean);
+            }
 
-        function removeTag(tag) {
-            tags = tags.filter(t => t !== tag);
+            function renderTags() {
+                var tagElements = tags.map(function(tag, idx) {
+                    return '<div class="tag"><span>' + escapeHtml(tag) + '</span><span class="tag-remove" data-index="' + idx + '">×</span></div>';
+                }).join('');
+
+                tagsContainer.innerHTML = tagElements + '<input type="text" id="tags-input" placeholder="输入标签后按回车">';
+                
+                // 绑定删除事件
+                document.querySelectorAll('.tag-remove').forEach(function(el) {
+                    el.addEventListener('click', function() {
+                        var idx = parseInt(this.getAttribute('data-index'));
+                        tags.splice(idx, 1);
+                        renderTags();
+                        updateTagsHidden();
+                    });
+                });
+
+                // 绑定输入事件
+                var newInput = document.getElementById('tags-input');
+                if (newInput) {
+                    newInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            var tag = this.value.trim();
+                            if (tag && tags.indexOf(tag) === -1) {
+                                tags.push(tag);
+                                renderTags();
+                                updateTagsHidden();
+                            }
+                        }
+                    });
+                }
+            }
+
+            function updateTagsHidden() {
+                if (tagsHidden) {
+                    tagsHidden.value = tags.join(',');
+                }
+            }
+
+            function escapeHtml(text) {
+                var map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+            }
+
+            // 初始化标签
             renderTags();
             updateTagsHidden();
-        }
-
-        function updateTagsHidden() {
-            if (tagsHidden) {
-                tagsHidden.value = tags.join(',');
-            }
-        }
-
-        function handleTagInput(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const tag = this.value.trim();
-                if (tag && !tags.includes(tag)) {
-                    tags.push(tag);
-                    renderTags();
-                    updateTagsHidden();
-                }
-            }
-        }
-
-        // 自动完成建议逻辑（复用 new_post 的实现）
-        function showSuggestions(list) {
-            let existing = document.getElementById('tags-suggestions');
-            if (existing) existing.remove();
-            if (!list || !list.length) return;
-            const box = document.createElement('div');
-            box.id = 'tags-suggestions';
-            box.style.position = 'absolute';
-            box.style.background = '#fff';
-            box.style.border = '1px solid #e6e9ef';
-            box.style.padding = '6px';
-            box.style.borderRadius = '6px';
-            box.style.zIndex = 1000;
-            list.forEach(function(item){
-                const el = document.createElement('div');
-                el.style.padding = '4px 8px';
-                el.style.cursor = 'pointer';
-                el.textContent = item;
-                el.addEventListener('click', function(){
-                    if (!tags.includes(item)) tags.push(item);
-                    renderTags();
-                    updateTagsHidden();
-                    box.remove();
-                });
-                box.appendChild(el);
-            });
-            const rect = tagsInput.getBoundingClientRect();
-            box.style.left = (rect.left + window.scrollX) + 'px';
-            box.style.top = (rect.bottom + window.scrollY + 6) + 'px';
-            document.body.appendChild(box);
-        }
-
-        function fetchSuggestions(q) {
-            if (!q) { showSuggestions([]); return; }
-            fetch(`/posting/tags/autocomplete/?q=${encodeURIComponent(q)}`)
-                .then(r => r.json())
-                .then(data => {
-                    if (data && data.ok) showSuggestions(data.results.filter(r=>!tags.includes(r)));
-                }).catch(()=>{});
-        }
-
-        function debounce(fn, wait) {
-            let t = null;
-            return function(...args) {
-                clearTimeout(t);
-                t = setTimeout(() => fn.apply(this, args), wait);
-            };
-        }
-
-        const debouncedFetch = debounce(fetchSuggestions, 250);
-
-        document.addEventListener('input', function(e){
-            const target = e.target;
-            if (target && target.id === 'tags-input') {
-                const q = target.value.trim();
-                debouncedFetch(q);
-            }
         });
-
-        // 初始化标签
-        renderTags();
-        updateTagsHidden();
     </script>
 </body>
 </html>

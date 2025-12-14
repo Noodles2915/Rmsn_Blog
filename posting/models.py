@@ -1,7 +1,7 @@
 from django.db import models
-from markdownx.models import MarkdownxField
 from users.models import User
 from utils.paths import pic_upload_path
+import uuid
 
 # Create your models here.
 
@@ -12,8 +12,10 @@ class Tag(models.Model):
         return self.name
 
 class Post(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200)
-    content = MarkdownxField()
+    content_raw = models.TextField(default='')  # 存储原始 Markdown
+    content = models.TextField()  # 存储渲染后的 HTML
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -24,11 +26,12 @@ class Post(models.Model):
         return self.title
     
 class Comment(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     post = models.ForeignKey(Post, related_name='comments', on_delete=models.CASCADE)
     level = models.IntegerField(default=0)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
-    author = models.CharField(max_length=100)
-    content = MarkdownxField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

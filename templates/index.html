@@ -1,28 +1,11 @@
 <!doctype html>
 <html lang="zh-cn">
+{% load static %}
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>一息博客</title>
-    <style>
-        :root{--bg:#f6f7fb;--card:#ffffff;--accent:#2b6cb0;--muted:#6b7280}
-        body{margin:0;font-family:Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;background:var(--bg);color:#111}
-        header{background:linear-gradient(90deg,#fff 0%,#f8fafc 100%);border-bottom:1px solid #e6e9ef;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
-        .brand{display:flex;align-items:center;gap:12px}
-        .brand h1{margin:0;font-size:18px}
-        .nav-shortcut{position:relative}
-        .user-shortcut{position:absolute;right:24px;top:16px}
-        .user-link{background:var(--card);border:1px solid #e2e8f0;padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--accent);font-weight:600}
-        main{max-width:980px;margin:28px auto;padding:0 16px}
-        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
-        .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 1px 2px rgba(16,24,40,0.03);border:1px solid #eef2f7}
-        .card h3{margin:0 0 8px 0;font-size:16px}
-        .meta{font-size:13px;color:var(--muted);margin-bottom:10px}
-        .excerpt{color:#374151;font-size:14px;min-height:44px}
-        .read-more{display:inline-block;margin-top:12px;color:var(--accent);text-decoration:none;font-weight:600}
-        footer{max-width:980px;margin:40px auto;text-align:center;color:var(--muted);font-size:13px}
-        @media (max-width:420px){.user-shortcut{position:static;margin-top:8px}}
-    </style>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
 </head>
 <body>
     <header>
@@ -42,14 +25,14 @@
 
     <main>
         <section>
-            <h2 style="margin:0 0 16px 0">最新文章</h2>
+            <h2 class="section-title">最新文章</h2>
 
             <div class="grid">
                 {% if posts %}
                     {% for post in posts %}
                         <article class="card">
                             <h3><a href="{{ post.url }}">{{ post.title }}</a></h3>
-                            <div class="meta">作者：<a href="{% url 'users:profile_user' post.author_username %}" style="color: var(--accent); text-decoration: none;">{{ post.author }}</a> • {{ post.created_at|date:"Y-m-d" }}</div>
+                            <div class="meta">作者：<a href="{% url 'users:profile_user' post.author_username %}" class="accent-link">{{ post.author }}</a> • {{ post.created_at|date:"Y-m-d" }}</div>
                             <p class="excerpt">{{ post.excerpt }}</p>
                             <a class="read-more" href="{{ post.url }}">阅读全文 →</a>
                         </article>
