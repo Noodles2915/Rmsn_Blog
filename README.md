@@ -1,6 +1,8 @@
 
 # RmsnBlog
 
+For English Readers:[English](README_EN.md)
+
 简体中文说明 — 一个基于 Django 的简单博客示例项目。项目仅依赖 Django 本身（没有额外第三方包）。
 
 **项目状态**: 教学/示例用途。适合学习 Django 项目结构、用户管理与简单帖子发布。
