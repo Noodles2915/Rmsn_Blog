@@ -1,7 +1,7 @@
 
 # RmsnBlog
 
-For English readers:[English](README_EN.md)
+For English Readers:[English](README_EN.md)
 
 简体中文说明 — 一个基于 Django 的简单博客示例项目。项目仅依赖 Django 本身（没有额外第三方包）。
 
@@ -75,5 +75,64 @@ python manage.py runserver
 - `posting/` — 博客 app（模型、视图、表单、管理面板相关）。
 - `users/` — 用户相关逻辑（登录、注册、表单）。
 - `templates/` — 全局模板文件。
+
+**静态脚本**
+本项目使用了网络上的静态脚本，由于无法确定开源协议是否允许在其它项目中挂载对应脚本，因此将相关内容放在下方.
+
+## 本地 JavaScript 和 CSS 资源清单
+
+### marked.min.js
+- **来源**: https://cdn.jsdelivr.net/npm/marked/marked.min.js
+- **版本**: Latest (4.x)
+- **用途**: Markdown 文本解析器，用于实时预览 Markdown 内容
+- **使用位置**:
+  - `templates/new_post.html` - 发布新文章时实时预览
+  - `templates/edit_post.html` - 编辑文章时实时预览
+
+### cropper.min.css
+- **来源**: https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css
+- **版本**: 1.5.13
+- **用途**: 图片裁剪工具的样式文件
+- **使用位置**: `templates/profile_edit.html` - 头像和背景图片裁剪
+
+### cropper.min.js
+- **来源**: https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js
+- **版本**: 1.5.13
+- **用途**: 图片裁剪工具的功能脚本
+- **使用位置**: `templates/profile_edit.html` - 头像和背景图片裁剪
+
+## 说明
+
+所有文件都已通过模板中的 Django `{% static %}` 标签引用，确保在生产环境中可以正确加载。
+
+### 更新方法：
+
+如需更新这些文件，可以使用以下命令：
+
+```bash
+# 更新 marked.js
+powershell -Command "Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/npm/marked/marked.min.js' -OutFile 'static/netscript/marked.min.js'"
+
+# 更新 cropper.min.css
+powershell -Command "Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css' -OutFile 'static/netscript/cropper.min.css'"
+
+# 更新 cropper.min.js
+powershell -Command "Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js' -OutFile 'static/netscript/cropper.min.js'"
+```
+
+## 许可证
+
+这些库遵循各自的开源许可证：
+- **marked.js**: MIT License
+- **cropperjs**: MIT License
+
+## 验证码速率限制
+
+项目对验证码请求应用了多层速率限制以防止滥用：
+
+- **单邮箱冷却时间**: 60 秒（客户端和服务器均进行检查）
+- **IP 限制**: 默认每小时 10 次发送限制（服务器端）。超过限制时，端点返回 HTTP 429，并在响应中包含 `retry_after` 字段，指示需要等待的秒数。
+
+如需更强大或分布式的速率限制（例如基于 Redis 的计数器或外部速率限制服务），可扩展 `send_verification_code` 函数以使用共享缓存或 Redis。
 
 ---

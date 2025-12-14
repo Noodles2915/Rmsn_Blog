@@ -14,12 +14,8 @@ Main directories:
 - `manage.py`: Django management script.
 
 Requirements:
-- Only `Django` is required. Recommended range: `Django>=4.2,<5`.
 
-Example `requirements.txt` (created in this repo):
-```
-Django>=4.2,<5
-```
+Refer to `requirements.txt`.
 
 Quick start (Windows PowerShell):
 
@@ -29,23 +25,23 @@ python -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
 
-2) Install Django
+1) Install Django
 ```powershell
 pip install -r requirements.txt
 ```
 
-3) Apply migrations and create a superuser
+1) Apply migrations and create a superuser
 ```powershell
 python manage.py migrate
 python manage.py createsuperuser
 ```
 
-4) Run the development server
+1) Run the development server
 ```powershell
 python manage.py runserver
 ```
 
-5) Visit `http://127.0.0.1:8000/` in your browser.
+1) Visit `http://127.0.0.1:8000/` in your browser.
 
 Run tests:
 - Use Django test runner: `python manage.py test`.
@@ -74,6 +70,32 @@ Repository file index (quick reference):
 - `posting/` — blog app (models, views, admin, templates).
 - `users/` — user app (forms, views, urls).
 - `templates/` — global templates.
+
+## Local JavaScript and CSS Resources
+
+This project uses scripts and styles from CDN sources. The related files have been downloaded locally to `/static/netscript/` for offline use and improved performance.
+
+### marked.min.js
+- **Source**: https://cdn.jsdelivr.net/npm/marked/marked.min.js
+- **Version**: Latest (4.x)
+- **Purpose**: Markdown parser for real-time markdown preview
+- **Used in**:
+  - `templates/new_post.html` - Real-time preview when publishing articles
+  - `templates/edit_post.html` - Real-time preview when editing articles
+
+### cropper.min.css
+- **Source**: https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css
+- **Version**: 1.5.13
+- **Purpose**: Image cropping tool stylesheet
+- **Used in**: `templates/profile_edit.html` - Avatar and background image cropping
+
+### cropper.min.js
+- **Source**: https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js
+- **Version**: 1.5.13
+- **Purpose**: Image cropping tool functionality
+- **Used in**: `templates/profile_edit.html` - Avatar and background image cropping
+
+All files are referenced through Django's `{% static %}` template tag in templates, ensuring proper loading in production environment.
 
 ## Rate limiting (verification emails)
 

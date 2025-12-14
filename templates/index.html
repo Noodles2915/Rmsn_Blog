@@ -24,6 +24,26 @@
     </header>
 
     <main>
+        <!-- 搜索功能 -->
+        {% if user %}
+        <section class="search-section">
+            <div class="search-container">
+                <form method="get" action="{% url 'posting:search_posts' %}" class="quick-search-form">
+                    <div class="search-input-group">
+                        <input 
+                            type="text" 
+                            name="q" 
+                            class="search-input" 
+                            placeholder="🔍 按标题或标签搜索..."
+                            required
+                        >
+                        <button type="submit" class="btn btn-primary">搜索</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+        {% endif %}
+
         <section>
             <h2 class="section-title">最新文章</h2>
 

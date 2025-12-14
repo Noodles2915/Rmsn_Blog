@@ -1,0 +1,124 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>搜索结果 - 一息博客</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="5" fill="#2b6cb0"/><text x="50%" y="55%" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="12" font-weight="700">RB</text></svg>
+            <h1>一息博客</h1>
+        </div>
+
+        <div class="nav-shortcut">
+            {% if user %}
+                <a class="user-link" href="{% url 'users:dashboard' %}">个人页 ({{ user.username }})</a>
+            {% else %}
+                <a class="user-link" href="{% url 'users:login' %}">登录 / 注册</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="card">
+                <div class="card-header">
+                    <h2>🔍 搜索文章</h2>
+                </div>
+
+                <div class="card-body">
+                    <!-- 搜索表单 -->
+                    <form method="get" class="search-form">
+                        <div class="search-input-group">
+                            <input 
+                                type="text" 
+                                name="q" 
+                                class="search-input" 
+                                placeholder="按标题或标签搜索..." 
+                                value="{{ query }}"
+                                autofocus
+                            >
+                            <button type="submit" class="btn btn-primary">搜索</button>
+                        </div>
+                        <div class="search-help">
+                            <small>提示：可以按文章标题或标签名称搜索</small>
+                        </div>
+                    </form>
+
+                    <!-- 搜索结果 -->
+                    {% if query %}
+                        {% if posts %}
+                            <div class="search-results">
+                                <p class="results-info">
+                                    找到 <strong>{{ paginator.count }}</strong> 篇相关文章{% if page_obj.number > 1 %} (第 {{ page_obj.number }} 页){% endif %}
+                                </p>
+
+                                <div class="results-list">
+                                    {% for post in posts %}
+                                        <article class="search-result-item">
+                                            <div class="result-header">
+                                                <h3><a href="{{ post.url }}">{{ post.title }}</a></h3>
+                                                {% if post.tags %}
+                                                    <div class="result-tags">
+                                                        {% for tag in post.tags %}
+                                                            <a href="{% url 'posting:search_posts' %}?q={{ tag }}" class="tag-badge">#{{ tag }}</a>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="result-meta">
+                                                <span>作者：<a href="{% url 'users:profile_user' post.author_username %}" class="accent-link">{{ post.author }}</a></span>
+                                                <span>•</span>
+                                                <span>{{ post.created_at|date:"Y-m-d H:i" }}</span>
+                                            </div>
+                                            <p class="result-excerpt">{{ post.excerpt }}</p>
+                                            <a href="{{ post.url }}" class="read-more">阅读全文 →</a>
+                                        </article>
+                                    {% endfor %}
+                                </div>
+
+                                <!-- 分页 -->
+                                {% if paginator.num_pages > 1 %}
+                                    <nav class="pagination">
+                                        {% if page_obj.has_previous %}
+                                            <a href="?q={{ query }}&page=1" class="page-link">« 首页</a>
+                                            <a href="?q={{ query }}&page={{ page_obj.previous_page_number }}" class="page-link">‹ 上一页</a>
+                                        {% endif %}
+
+                                        <span class="page-info">
+                                            第 {{ page_obj.number }} / {{ paginator.num_pages }} 页
+                                        </span>
+
+                                        {% if page_obj.has_next %}
+                                            <a href="?q={{ query }}&page={{ page_obj.next_page_number }}" class="page-link">下一页 ›</a>
+                                            <a href="?q={{ query }}&page={{ paginator.num_pages }}" class="page-link">末页 »</a>
+                                        {% endif %}
+                                    </nav>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="no-results">
+                                <div class="no-results-icon">🔍</div>
+                                <p>未找到与 "<strong>{{ query }}</strong>" 相关的文章</p>
+                                <p class="no-results-hint">试试更换搜索词或<a href="{% url 'index' %}">返回首页</a></p>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="empty-search">
+                            <p>输入搜索词开始查找文章</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div>© 2025 一息博客 • Django 出品</div>
+    </footer>
+</body>
+</html>

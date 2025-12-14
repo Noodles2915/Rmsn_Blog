@@ -259,3 +259,53 @@ def delete_comment(request, comment_id):
     
     # 普通请求重定向回文章页
     return redirect('posting:view_post', post_id=post.id)
+
+
+def search_posts(request):
+    """搜索文章（按标题或标签）- 仅限登录用户"""
+    from django.db.models import Q
+    from django.core.paginator import Paginator
+    from django.urls import reverse
+    
+    user = get_current_user(request)
+    if not user:
+        return redirect('users:login')
+    
+    query = request.GET.get('q', '').strip()
+    posts = []
+    paginator = None
+    page_obj = None
+    
+    if query:
+        # 搜索标题或标签名称
+        qs = Post.objects.filter(
+            Q(title__icontains=query) | Q(tags__name__icontains=query)
+        ).distinct().select_related('author').prefetch_related('tags').order_by('-created_at')
+        
+        # 分页，每页 10 个
+        paginator = Paginator(qs, 10)
+        page_num = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_num)
+        
+        # 预处理数据
+        for p in page_obj:
+            excerpt = Truncator(strip_tags(p.content)).chars(140)
+            posts.append({
+                'id': p.id,
+                'title': p.title,
+                'url': reverse('posting:view_post', args=[p.id]),
+                'author': p.author.username,
+                'author_username': p.author.username,
+                'created_at': p.created_at,
+                'excerpt': excerpt,
+                'tags': list(p.tags.values_list('name', flat=True)),
+            })
+    
+    context = {
+        'user': user,
+        'query': query,
+        'posts': posts,
+        'page_obj': page_obj,
+        'paginator': paginator,
+    }
+    return render(request, 'search_results.html', context)
