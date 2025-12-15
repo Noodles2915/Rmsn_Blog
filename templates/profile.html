@@ -18,7 +18,8 @@
         </div>
 
         <div class="header-right">
-            <a href="{% url 'users:dashboard' %}" class="back-btn">← 返回仪表盘</a>
+            {% url 'users:dashboard' as dash_url %}
+            {% include "_back_button.html" with url=dash_url label="← 返回仪表盘" %}
         </div>
     </header>
 
@@ -58,13 +59,20 @@
                                 <span class="meta-label">收到评论</span>
                                 <span class="meta-value">{{ comments_count }}</span>
                             </div>
+                            <div class="meta-item">
+                                <span class="meta-label">粉丝数</span>
+                                <span class="meta-value followers-count">{{ followers_count }}</span>
+                            </div>
                         </div>
 
                         <div class="actions">
                             {% if is_own_profile %}
                                 <a href="{% url 'users:profile_edit' %}" class="btn btn-primary">编辑信息</a>
+                            {% else %}
+                                <button type="button" id="follow-btn" class="btn follow-btn {% if is_following %}following{% else %}follow{% endif %}" aria-pressed="{{ is_following|yesno:'true,false' }}" data-username="{{ user.username }}"{% if not is_following %} style="background-color: var(--accent); color: #fff;"{% endif %}><span class="icon">+</span> <span class="label">{{ is_following|yesno:"已关注,关注" }}</span></button>
                             {% endif %}
-                            <a href="{% url 'users:dashboard' %}" class="btn btn-secondary">返回</a>
+                            {% url 'users:dashboard' as dash_url %}
+                            {% include "_back_button.html" with url=dash_url label="返回" extra_class="btn btn-secondary" %}
                         </div>
                     </div>
                 </div>
@@ -82,8 +90,8 @@
                             <div class="stat-label">收到评论</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-number">{{ views_count }}</div>
-                            <div class="stat-label">总浏览量</div>
+                            <div class="stat-number followers-count">{{ followers_count }}</div>
+                            <div class="stat-label">粉丝数</div>
                         </div>
                     </div>
                 </div>
@@ -94,5 +102,64 @@
     <footer>
         <div>© 2025 一息博客 • Django 出品</div>
     </footer>
+    <script>
+        (function(){
+            function getCookie(name){
+                var v=document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)');
+                return v ? v.pop() : '';
+            }
+
+            var btn = document.getElementById('follow-btn');
+            if (!btn) return;
+            btn.addEventListener('click', function(){
+                if (btn._busy) return;
+                btn._busy = true;
+                btn.disabled = true;
+                var username = btn.getAttribute('data-username') || '{{ user.username }}';
+                var url = '{% url "socials:toggle_follow" "__USERNAME__" %}'.replace('__USERNAME__', encodeURIComponent(username));
+                var csrftoken = getCookie('csrftoken');
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrftoken,
+                        'Accept': 'application/json'
+                    },
+                    body: null
+                }).then(function(res){ return res.json(); })
+                .then(function(data){
+                    if (data && data.ok){
+                        // update button visual state and label
+                        var label = btn.querySelector('.label');
+                        if (label) label.textContent = data.following ? '已关注' : '关注';
+                        btn.setAttribute('aria-pressed', data.following ? 'true' : 'false');
+                        if (data.following) { btn.classList.add('following'); btn.classList.remove('follow'); }
+                        else { btn.classList.remove('following'); btn.classList.add('follow'); }
+
+                        // update any followers-count elements and add pulse
+                        document.querySelectorAll('.followers-count').forEach(function(el){
+                            el.textContent = typeof data.followers_count !== 'undefined' ? data.followers_count : el.textContent;
+                            el.classList.remove('pulse');
+                            void el.offsetWidth; // reflow
+                            el.classList.add('pulse');
+                        });
+                        // toggle inline style so UA 'buttonface' won't persist
+                        if (data.following) {
+                            btn.style.backgroundColor = '';
+                            btn.style.color = '';
+                        } else {
+                            btn.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--accent') || 'var(--accent)';
+                            btn.style.color = '#fff';
+                        }
+                    } else {
+                        alert((data && data.error) || '操作失败');
+                    }
+                }).catch(function(err){
+                    console.error(err);
+                    alert('网络错误，请稍后重试');
+                }).finally(function(){ btn.disabled = false; btn._busy = false; });
+            });
+        })();
+    </script>
 </body>
 </html>

@@ -17,8 +17,29 @@
             <h1>一息博客</h1>
         </div>
 
-        <div class="header-right">
-            <a href="{% url 'index' %}" class="back-btn">← 返回首页</a>
+        <div class="nav-shortcut">
+                <a href="{% url 'index' %}" class="back-btn">← 返回首页</a>
+                {% if user %}
+                    <div class="user-actions">
+                        <a href="{% url 'socials:notifications_list' %}" id="notif-link" class="icon-link">🔔 <span id="notif-count" class="badge" style="display:none;">0</span></a>
+                        <a href="{% url 'socials:messages_list' %}" id="msg-link" class="icon-link">✉️ <span id="msg-count" class="badge" style="display:none;">0</span></a>
+                    </div>
+                    <div class="user-dropdown" id="user-dropdown">
+                        <button class="user-toggle" id="user-toggle">
+                            <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="user-avatar">
+                            <span class="user-name">{{ user.username }}</span>
+                            <span class="chev">▾</span>
+                        </button>
+                        <div class="user-menu" id="user-menu" style="display:none;">
+                            <a class="user-menu-item" href="{% url 'users:dashboard' %}">仪表盘</a>
+                            <a class="user-menu-item" href="{% url 'users:profile_user' user.username %}">个人资料</a>
+                            <a class="user-menu-item" href="{% url 'users:profile_edit' %}">编辑资料</a>
+                            <a class="user-menu-item" href="{% url 'users:logout' %}">登出</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a class="user-link" href="{% url 'users:login' %}">登录 / 注册</a>
+                {% endif %}
         </div>
     </header>
 
@@ -60,11 +81,52 @@
             <footer class="post-footer">
                 <div>
                     <small>本文由 <a href="{% url 'users:profile_user' post.author.username %}" class="accent-link">{{ post.author.username }}</a> 发布</small>
+                    <button type="button" id="like-btn" class="btn btn-secondary{% if user_liked %} liked{% endif %}" data-post-id="{{ post.id }}"><span class="icon" id="like-icon">❤</span> <span id="likes-count">{{ post.likes.count }}</span></button>
                 </div>
                 <div class="post-actions">
                     <a href="{% url 'index' %}" class="btn">← 返回首页</a>
                 </div>
             </footer>
+<script>
+// like button handler
+document.addEventListener('DOMContentLoaded', function(){
+    var likeBtn = document.getElementById('like-btn');
+    if(!likeBtn) return;
+    likeBtn.addEventListener('click', function(e){
+        if (likeBtn._busy) return;
+        likeBtn._busy = true;
+        var postId = likeBtn.getAttribute('data-post-id');
+        var csrftoken = (function(){
+            var name = 'csrftoken=';
+            var ca = document.cookie.split(';');
+            for(var i=0;i<ca.length;i++){var c=ca[i].trim(); if(c.indexOf(name)==0) return c.substring(name.length,c.length);} return '';
+        })();
+        fetch(window.location.pathname + 'like/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrftoken,
+            },
+            body: JSON.stringify({}),
+        }).then(function(r){ return r.json(); }).then(function(data){
+            var icon = document.getElementById('like-icon');
+            if(data && data.ok){
+                document.getElementById('likes-count').textContent = data.likes_count;
+                if (data.liked) {
+                    likeBtn.classList.add('liked');
+                    if (icon) { icon.classList.add('pop'); setTimeout(function(){ icon.classList.remove('pop'); }, 380); }
+                } else {
+                    likeBtn.classList.remove('liked');
+                    if (icon) { icon.classList.add('shrink'); setTimeout(function(){ icon.classList.remove('shrink'); }, 240); }
+                }
+            } else if (data && data.error) {
+                alert(data.error);
+            }
+        }).catch(function(){ /* ignore */ }).finally(function(){ likeBtn._busy = false; });
+    });
+});
+</script>
         </article>
 
         <section class="comments-section">
@@ -99,8 +161,10 @@
             </div>
             {% endif %}
 
-            <!-- 已有评论（显示多级） -->
-            <div id="comments-list">
+            <!-- 已有评论（客户端渲染） -->
+            <div id="comments-list" data-post-id="{{ post.id }}">
+                <!-- 当 JS 不可用时，保留服务器渲染的内容作为回退 -->
+                <noscript>
                 {% if comments %}
                     {% for comment in comments %}
                         {% include "_comment.html" with comment=comment offset=0 post=post %}
@@ -108,6 +172,7 @@
                 {% else %}
                     <p>还没有评论，快来抢沙发吧。</p>
                 {% endif %}
+                </noscript>
             </div>
         </section>
     </div>
@@ -115,8 +180,26 @@
     <footer>
         <div>© 2025 一息博客 • Django 出品</div>
     </footer>
+    <script src="{% static 'netscript/marked.min.js' %}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function(){
+            // 用户下拉菜单切换（如果存在）
+            (function(){
+                var toggle = document.getElementById('user-toggle');
+                var menu = document.getElementById('user-menu');
+                if (!toggle || !menu) return;
+                document.addEventListener('click', function(e){
+                    if (toggle.contains(e.target)){
+                            menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'flex' : 'none';
+                            fetch('{% url "socials:notifications_count" %}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } }).then(r=>r.json()).then(function(d){ if (d && d.count){ var n = document.getElementById('notif-count'); n.textContent = d.count; n.style.display = d.count? 'inline-block':'none'; } });
+                        return;
+                    }
+                    if (!menu.contains(e.target)){
+                        menu.style.display = 'none';
+                    }
+                });
+                document.addEventListener('keydown', function(e){ if (e.key === 'Escape') menu.style.display = 'none'; });
+            })();
             // 清空按钮功能
             var clearBtn = document.getElementById('btn-clear-comment');
             if (clearBtn) {
@@ -170,82 +253,200 @@
             bindReplyButtons(document);
             bindCancelButtons(document);
 
-            // 表单提交（事件委托）：支持 AJAX 提交并局部插入新评论
-            var commentsSection = document.querySelector('.comments-section');
-            if (commentsSection) {
-                commentsSection.addEventListener('submit', function(e){
-                    var form = e.target;
-                    if (form.tagName.toLowerCase() !== 'form') return;
-                    e.preventDefault();
+            // ---------- 客户端评论 API 逻辑 ----------
+            var postId = document.getElementById('comments-list').dataset.postId;
+            var apiCommentsURL = '/post/api/' + postId + '/comments/';
+            var apiAddCommentURL = '/post/api/' + postId + '/comment/';
 
-                    var action = form.getAttribute('action') || window.location.href;
-                    var formData = new FormData(form);
+            // 从后端获取评论并渲染树形结构
+            // 辅助：从 cookie 获取 CSRF token
+            function getCookie(name){
+                var v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+                return v ? v.pop() : '';
+            }
 
-                    var ta = form.querySelector('textarea');
-                    if (ta) {
-                        formData.set(ta.name || 'content', ta.value || '');
-                    }
-
-                    fetch(action, {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRFToken': (document.querySelector('input[name=csrfmiddlewaretoken]')||{}).value || ''
-                        },
-                        body: formData,
-                    }).then(function(res){
-                        return res.json();
-                    }).then(function(data){
-                        if (!data || !data.ok) {
-                            console.error('提交评论失败', data);
-                            alert('评论提交失败，请重试');
-                            return;
-                        }
-
-                        // 插入返回的 HTML
-                        if (data.parent_id) {
-                            var parent = document.getElementById('comment-' + data.parent_id);
-                            if (parent) {
-                                var replies = parent.querySelector('.replies-container');
-                                if (replies) {
-                                    replies.insertAdjacentHTML('beforeend', data.html);
-                                    // 为新插入的回复绑定按钮
-                                    bindReplyButtons(replies);
-                                    bindCancelButtons(replies);
-                                    bindDeleteButtons(replies);
-                                }
-                            }
-                            // 隐藏并清空回复表单
-                            var replyForm = document.getElementById('reply-form-' + data.parent_id);
-                            if (replyForm) {
-                                replyForm.style.display = 'none';
-                                var rta = replyForm.querySelector('textarea');
-                                if (rta) rta.value = '';
-                            }
-                        } else {
-                            // 顶层评论，插入到 comments-list 顶部
-                            var list = document.getElementById('comments-list');
-                            if (list) {
-                                list.insertAdjacentHTML('afterbegin', data.html);
-                                // 为新插入的评论绑定按钮
-                                var newComment = document.getElementById('comment-' + data.comment_id);
-                                if (newComment) {
-                                    bindReplyButtons(newComment);
-                                    bindCancelButtons(newComment);
-                                    bindDeleteButtons(newComment);
-                                }
-                            }
-                            var mainTextarea = document.getElementById('comment-content');
-                            if (mainTextarea) mainTextarea.value = '';
-                        }
+            function fetchAndRenderComments(){
+                fetch(apiCommentsURL, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(function(res){ return res.json(); })
+                    .then(function(data){
+                        if (!data || !data.ok) return;
+                        renderCommentsTree(data.comments);
                     }).catch(function(err){
-                        console.error('AJAX 错误', err);
-                        alert('提交失败，请重试');
+                        console.error('获取评论失败', err);
                     });
+            }
+
+            // 将扁平评论数组转换为树并渲染
+            function renderCommentsTree(flat){
+                var map = {}, roots = [];
+                flat.forEach(function(c){ c.children = []; map[c.id] = c; });
+                flat.forEach(function(c){
+                    if (c.parent && map[c.parent]){
+                        map[c.parent].children.push(c);
+                    } else {
+                        roots.push(c);
+                    }
+                });
+
+                var container = document.getElementById('comments-list');
+                if (!container) return;
+                container.innerHTML = '';
+                if (roots.length === 0){
+                    container.innerHTML = '<p>还没有评论，快来抢沙发吧。</p>';
+                    return;
+                }
+                var frag = document.createDocumentFragment();
+                roots.slice().reverse().forEach(function(node){
+                    frag.appendChild(createCommentNode(node));
+                });
+                container.appendChild(frag);
+                // 绑定按钮事件
+                bindReplyButtons(container);
+                bindCancelButtons(container);
+                bindDeleteButtons(container);
+            }
+
+            function createCommentNode(node){
+                var wrapper = document.createElement('div');
+                wrapper.id = 'comment-' + node.id;
+                wrapper.className = 'comment';
+
+                var avatar = document.createElement('img');
+                avatar.className = 'comment-avatar';
+                avatar.src = node.author_avatar || '/static/avatar/blank-pfp.png';
+                wrapper.appendChild(avatar);
+
+                var body = document.createElement('div');
+                body.className = 'comment-body';
+
+                var header = document.createElement('div');
+                header.className = 'comment-header';
+                var authorLink = document.createElement('a');
+                authorLink.className = 'comment-author-link';
+                authorLink.textContent = node.author || '';
+                if (node.author_profile_url) authorLink.href = node.author_profile_url;
+                var dateSpan = document.createElement('span');
+                dateSpan.className = 'comment-date';
+                dateSpan.textContent = (new Date(node.created_at)).toLocaleString();
+                header.appendChild(authorLink);
+                header.appendChild(dateSpan);
+
+                var contentDiv = document.createElement('div');
+                contentDiv.className = 'comment-content';
+                // Prefer client-side rendering from raw markdown when available
+                if (window.marked && node.content_raw !== undefined && node.content_raw !== null){
+                    try{
+                        contentDiv.innerHTML = marked.parse(node.content_raw || '');
+                    }catch(e){
+                        contentDiv.innerHTML = node.content || '';
+                    }
+                } else {
+                    contentDiv.innerHTML = node.content || '';
+                }
+
+                var actions = document.createElement('div');
+                actions.className = 'comment-actions';
+                var replyBtn = document.createElement('button');
+                replyBtn.className = 'btn-reply comment-action';
+                replyBtn.setAttribute('data-comment-id', node.id);
+                replyBtn.textContent = '回复';
+                var delBtn = document.createElement('button');
+                delBtn.className = 'btn-delete-comment comment-action';
+                delBtn.setAttribute('data-comment-id', node.id);
+                delBtn.textContent = '删除';
+                actions.appendChild(replyBtn);
+                actions.appendChild(delBtn);
+
+                var replyContainer = document.createElement('div');
+                replyContainer.className = 'reply-form-container';
+                replyContainer.id = 'reply-form-' + node.id;
+                replyContainer.style.display = 'none';
+
+                var repliesWrap = document.createElement('div');
+                repliesWrap.className = 'replies-container';
+                if (node.children && node.children.length){
+                    node.children.forEach(function(child){
+                        repliesWrap.appendChild(createCommentNode(child));
+                    });
+                }
+
+                body.appendChild(header);
+                body.appendChild(contentDiv);
+                body.appendChild(actions);
+                body.appendChild(replyContainer);
+                body.appendChild(repliesWrap);
+
+                wrapper.appendChild(body);
+                return wrapper;
+            }
+
+            // 点击回复：在占位容器内插入一个回复表单（委托绑定）
+            function createReplyForm(parentId){
+                var html = [];
+                html.push('<form class="reply-form-local" data-parent-id="' + parentId + '">');
+                html.push('<textarea name="content" rows="3" placeholder="在此输入回复，支持 Markdown..."></textarea>');
+                html.push('<div class="form-actions"><button class="btn btn-primary" type="submit">提交回复</button> <button type="button" class="btn-cancel-reply btn btn-secondary" data-comment-id="' + parentId + '">取消</button></div>');
+                html.push('</form>');
+                return html.join('');
+            }
+
+            // 事件绑定（reply, cancel, delete）
+            function bindReplyButtons(root){
+                (root || document).querySelectorAll('.btn-reply').forEach(function(btn){
+                    if (btn.dataset.bound) return;
+                    btn.addEventListener('click', function(e){
+                        e.preventDefault();
+                        var cid = this.getAttribute('data-comment-id');
+                        var container = document.getElementById('reply-form-' + cid);
+                        if (!container) return;
+                        if (container.innerHTML.trim() === ''){
+                            container.innerHTML = createReplyForm(cid);
+                            // 绑定本地表单提交
+                            var f = container.querySelector('form');
+                            if (f) bindLocalReplyForm(f);
+                        }
+                        container.style.display = 'block';
+                        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    });
+                    btn.dataset.bound = '1';
                 });
             }
 
-            // 绑定删除评论按钮
+            function bindLocalReplyForm(form){
+                if (form.dataset.bound) return;
+                form.addEventListener('submit', function(e){
+                    e.preventDefault();
+                    var parentId = form.dataset.parentId;
+                    var ta = form.querySelector('textarea');
+                    var content = ta ? ta.value.trim() : '';
+                    if (!content){ alert('回复内容不能为空'); return; }
+                    fetch(apiAddCommentURL, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ content: content, parent_id: parentId })
+                    }).then(function(res){ return res.json(); })
+                    .then(function(data){
+                        if (!data || !data.ok){ alert(data && data.error ? data.error : '回复失败'); return; }
+                        fetchAndRenderComments();
+                    }).catch(function(err){ console.error(err); alert('网络错误'); });
+                });
+                form.dataset.bound = '1';
+            }
+
+            function bindCancelButtons(root){
+                (root || document).querySelectorAll('.btn-cancel-reply').forEach(function(btn){
+                    if (btn.dataset.bound) return;
+                    btn.addEventListener('click', function(){
+                        var cid = this.getAttribute('data-comment-id');
+                        var container = document.getElementById('reply-form-' + cid);
+                        if (container) {
+                            container.style.display = 'none';
+                            container.innerHTML = '';
+                        }
+                    });
+                    btn.dataset.bound = '1';
+                });
+            }
+
             function bindDeleteButtons(root){
                 (root || document).querySelectorAll('.btn-delete-comment').forEach(function(btn){
                     if (btn.dataset.bound) return;
@@ -253,34 +454,23 @@
                         e.preventDefault();
                         var cid = this.getAttribute('data-comment-id');
                         if (!confirm('确定要删除此评论吗？此操作不可恢复。')) return;
-                        
-                        // AJAX 删除评论
                         fetch('/post/comment/' + cid + '/delete/', {
-                            method: 'POST',
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRFToken': (document.querySelector('input[name=csrfmiddlewaretoken]')||{}).value || ''
-                            }
-                        }).then(function(res){
-                            return res.json();
-                        }).then(function(data){
-                            if (data.ok) {
-                                // 移除评论元素
-                                var commentEl = document.getElementById('comment-' + cid);
-                                if (commentEl) commentEl.remove();
-                            } else {
-                                alert(data.error || '删除失败');
-                            }
-                        }).catch(function(err){
-                            console.error('删除错误', err);
-                            alert('删除失败，请重试');
-                        });
+                            method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') }
+                        }).then(function(res){ return res.json(); })
+                        .then(function(data){ if (data.ok) fetchAndRenderComments(); else alert(data.error||'删除失败'); })
+                        .catch(function(err){ console.error(err); alert('删除失败'); });
                     });
                     btn.dataset.bound = '1';
                 });
             }
 
+            // 初始加载
+            fetchAndRenderComments();
+            // 绑定删除按钮（可能在 noscript 回退时使用）
             bindDeleteButtons(document);
+            // -----------------------------------------
+
+            
         });
     </script>
 </body>

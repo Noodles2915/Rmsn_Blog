@@ -22,8 +22,18 @@ class Post(models.Model):
     tags = models.ManyToManyField('Tag', related_name='posts', blank=True)
     views_count = models.IntegerField(default=0)
 
+
+class PostLike(models.Model):
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='likes')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'post')
+
     def __str__(self):
-        return self.title
+        return f"{self.user.username} likes {self.post.title}"
+    
     
 class Comment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -31,6 +41,7 @@ class Comment(models.Model):
     level = models.IntegerField(default=0)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    content_raw = models.TextField(default='')  # 存储原始 Markdown（供客户端渲染）
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 

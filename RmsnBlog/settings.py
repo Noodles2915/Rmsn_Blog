@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'markdownx',
     'users.apps.UsersConfig',
     'posting.apps.PostingConfig',
+    'socials.apps.SocialsConfig',
 ]
 
 MIDDLEWARE = [

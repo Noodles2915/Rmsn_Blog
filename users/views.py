@@ -132,15 +132,22 @@ def dashboard(request):
     # 计算该用户所有文章收到的评论总数
     user_post_ids = Post.objects.filter(author=user).values_list('id', flat=True)
     comments_count = Comment.objects.filter(post_id__in=user_post_ids).count()
-    # 计算该用户所有文章的浏览量总和
+    # 计算该用户所有文章的浏览量总和（保留原有数据）
     views_count = Post.objects.filter(author=user).aggregate(total=Sum('views_count'))['total'] or 0
-    
+    # 计算粉丝数（被关注者数量）
+    try:
+        from socials.models import Follow
+        followers_count = Follow.objects.filter(followed=user).count()
+    except Exception:
+        followers_count = 0
+
     context = {
         'user': user,
         'user_posts': user_posts,
         'posts_count': posts_count,
         'comments_count': comments_count,
         'views_count': views_count,
+        'followers_count': followers_count,
     }
     return render(request, 'dashboard.html', context)
 
@@ -165,11 +172,25 @@ def profile(request, username=None):
     # 计算该用户所有文章收到的评论总数
     user_post_ids = Post.objects.filter(author=profile_user).values_list('id', flat=True)
     comments_count = Comment.objects.filter(post_id__in=user_post_ids).count()
-    # 计算该用户所有文章的浏览量总和
+    # 计算该用户所有文章的浏览量总和（保留）
     views_count = Post.objects.filter(author=profile_user).aggregate(total=Sum('views_count'))['total'] or 0
+    # 粉丝数
+    try:
+        from socials.models import Follow
+        followers_count = Follow.objects.filter(followed=profile_user).count()
+    except Exception:
+        followers_count = 0
     
     # 判断是否是当前用户自己的页面
     is_own_profile = current_user and current_user.id == profile_user.id
+    # 判断当前用户是否已关注该用户
+    is_following = False
+    try:
+        if current_user and current_user.id != profile_user.id:
+            from socials.models import Follow
+            is_following = Follow.objects.filter(follower=current_user, followed=profile_user).exists()
+    except Exception:
+        is_following = False
     
     context = {
         'user': profile_user,
@@ -178,6 +199,8 @@ def profile(request, username=None):
         'posts_count': posts_count,
         'comments_count': comments_count,
         'views_count': views_count,
+        'followers_count': followers_count,
+        'is_following': is_following,
     }
     return render(request, 'profile.html', context)
 

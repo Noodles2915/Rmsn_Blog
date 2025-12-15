@@ -1,0 +1,60 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>通知 - 一息博客</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
+<body>
+    <header>
+        <div class="brand"><h1>一息博客</h1></div>
+        <div class="header-actions">
+            {% url 'index' as index_url %}
+            <a href="{{ index_url }}" class="back-btn">← 返回首页</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <h2>通知</h2>
+        <div class="notifications-list">
+            {% if notifications %}
+                <ul>
+                    {% for n in notifications %}
+                        <li class="notif-item {% if n.unread %}unread{% endif %}">
+                            <div class="notif-verb">
+                                {% if n.actor %}{{ n.actor.username }}{% endif %} {{ n.verb }}
+                                {% if n.target_content_type and n.target_object_id %}
+                                    {% if n.target_content_type.model == 'post' %}
+                                        — <a href="{% url 'posting:view_post' n.target_object_id %}">查看文章</a>
+                                    {% elif n.target_content_type.model == 'comment' %}
+                                        {% with target_comment=n.target %}
+                                            {% if target_comment %}
+                                                — <a href="{% url 'posting:view_post' target_comment.post.id %}#comment-{{ target_comment.id }}">查看评论</a>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% elif n.target_content_type.model == 'user' %}
+                                        — <a href="{% url 'users:profile_user' n.target_object_id %}">查看个人页</a>
+                                    {% elif n.target_content_type.model == 'message' or n.target_content_type.model == 'message' %}
+                                        {% with target_msg=n.target %}
+                                            {% if target_msg %}
+                                                — <a href="{% url 'socials:messages_list' %}#msg-{{ target_msg.id }}">查看私信</a>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% else %}
+                                        <!-- 其他类型暂无处理 -->
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="notif-time">{{ n.created_at|date:"Y-m-d H:i" }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>暂无通知。</p>
+            {% endif %}
+        </div>
+    </main>
+</body>
+</html>

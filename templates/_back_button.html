@@ -1,0 +1,9 @@
+{% with ref=request.META.HTTP_REFERER|default:'' host=request.META.HTTP_HOST|default:'' %}
+	{% if ref and host and host in ref %}
+		{% with target=ref %}
+			<a href="{{ target }}" class="{{ extra_class|default:'back-btn' }}">{{ label|default:'← 返回' }}</a>
+		{% endwith %}
+	{% else %}
+		<a href="{{ url }}" class="{{ extra_class|default:'back-btn' }}">{{ label|default:'← 返回' }}</a>
+	{% endif %}
+{% endwith %}

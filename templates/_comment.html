@@ -1,3 +1,4 @@
+{% with offset|default:0 as depth %}
 <div id="comment-{{ comment.id }}" class="comment">
     <img src="{{ comment.author.avatar_url }}" alt="{{ comment.author.username }}" class="comment-avatar">
     <div class="comment-body">
@@ -39,8 +40,14 @@
 
         <div class="replies-container">
         {% for reply in comment.replies.all %}
-            {% include "_comment.html" with comment=reply post=post %}
+            {% if depth|add:0 < 6 %}
+                {% include "_comment.html" with comment=reply post=post offset=depth|add:1 %}
+            {% else %}
+                <div class="reply-truncated">更多回复已被折叠</div>
+            {% endif %}
         {% endfor %}
         </div>
+</div>
+{% endwith %}
     </div>
 </div>

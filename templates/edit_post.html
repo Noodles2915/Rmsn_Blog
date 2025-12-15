@@ -18,7 +18,8 @@
         </div>
 
         <div class="header-right">
-            <a href="{% url 'users:dashboard' %}" class="back-btn">← 返回仪表盘</a>
+            {% url 'users:dashboard' as dash_url %}
+            {% include "_back_button.html" with url=dash_url label="← 返回仪表盘" %}
         </div>
     </header>
 
@@ -93,7 +94,8 @@
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary" name="action" value="save">保存修改</button>
                     <button type="submit" class="btn btn-secondary" name="action" value="draft">保存为草稿</button>
-                    <a href="{% url 'users:dashboard' %}" class="btn btn-secondary">取消</a>
+                    {% url 'users:dashboard' as dash_url %}
+                    {% include "_back_button.html" with url=dash_url label="取消" extra_class="btn btn-secondary" %}
                 </div>
             </form>
         </div>

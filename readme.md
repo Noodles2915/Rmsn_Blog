@@ -15,12 +15,8 @@ For English Readers:[English](README_EN.md)
 - `manage.py`: Django 管理脚本。
 
 **依赖**:
-- 仅需 `Django`（推荐使用与本机 Python 兼容的稳定版本，例如 `django>=3.2` 或 `django>=4.x`，视你的环境而定）。
 
-示例 `requirements.txt`（可选）:
-```
-Django
-```
+见`requirements.txt`.
 
 **快速开始（Windows PowerShell）**
 
@@ -30,23 +26,23 @@ python -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
 
-2) 安装 Django
+1) 安装 Django
 ```
 pip install Django
 ```
 
-3) 应用迁移并创建超级用户
+1) 应用迁移并创建超级用户
 ```
 python manage.py migrate
 python manage.py createsuperuser
 ```
 
-4) 启动开发服务器
+1) 启动开发服务器
 ```
 python manage.py runserver
 ```
 
-5) 打开浏览器访问 `http://127.0.0.1:8000/`。
+1) 打开浏览器访问 `http://127.0.0.1:8000/`。
 
 **运行测试**
 - 使用 Django 测试命令: `python manage.py test`。

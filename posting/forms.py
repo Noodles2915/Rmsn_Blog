@@ -51,6 +51,15 @@ class PostForm(forms.ModelForm):
         # 不在这里验证 content，因为它会由 JavaScript 和视图层处理
         return cleaned_data
 
+    def clean_title(self):
+        title = self.cleaned_data.get('title', '') or ''
+        title = title.strip()
+        # 允许中文、字母、数字、空格及常见标点 - 防止特殊控制字符
+        import re
+        if title and not re.match(r'^[\w\u4e00-\u9fff\s\-_:,\.\(\)]+$', title):
+            raise forms.ValidationError('标题包含不允许的字符（仅允许字母、数字、中文、空格及 - _ : , . () 等）')
+        return title
+
     def clean_content(self):
         # 允许空值，由 JavaScript 验证
         return self.cleaned_data.get('content', '')

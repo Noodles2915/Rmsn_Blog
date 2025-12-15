@@ -2,13 +2,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from users.views import get_current_user
-from .models import Post, Tag, Comment
+from .models import Post, Tag, Comment, PostLike
 from .forms import PostForm, CommentForm, ALLOWED_TAGS, ALLOWED_ATTRIBUTES
 from markdownx.utils import markdownify
 import bleach
 import json
 from django.utils.html import strip_tags
 from django.utils.text import Truncator
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.urls import reverse
 
 
 def new_post(request):
@@ -141,12 +144,21 @@ def view_post(request, post_id):
     # 获取当前用户
     user = get_current_user(request)
 
+    # 当前用户是否已点赞此文章
+    user_liked = False
+    try:
+        if user:
+            user_liked = PostLike.objects.filter(user=user, post=post).exists()
+    except Exception:
+        user_liked = False
+
     context = {
         'post': post,
         'comments': comments,
         'tags': tags,
         'is_updated': is_updated,
         'user': user,
+        'user_liked': user_liked,
     }
     return render(request, 'post_detail.html', context)
 
@@ -191,8 +203,24 @@ def add_comment(request, post_id):
         parent=parent,
         level=level,
         author=user,
+        content_raw=raw_md,
         content=cleaned,
     )
+
+    # 创建通知：如果发表评论的人不是文章作者，通知文章作者
+    try:
+        from socials.models import Notification
+        from django.contrib.contenttypes.models import ContentType
+        # 通知文章作者，target 指向 Post
+        if post.author.id != user.id:
+            ct = ContentType.objects.get_for_model(post.__class__)
+            Notification.objects.create(user=post.author, actor=user, verb='评论了你的文章', target_content_type=ct, target_object_id=str(post.id))
+        # 如果是回复，通知父评论作者（且不重复通知文章作者）
+        if parent and parent.author.id != user.id and parent.author.id != post.author.id:
+            ct_c = ContentType.objects.get_for_model(parent.__class__)
+            Notification.objects.create(user=parent.author, actor=user, verb='回复了你的评论', target_content_type=ct_c, target_object_id=str(parent.id))
+    except Exception:
+        pass
 
     # 支持 AJAX：返回渲染后的 HTML 片段以便局部刷新
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -200,6 +228,36 @@ def add_comment(request, post_id):
         return JsonResponse({'ok': True, 'html': rendered, 'comment_id': str(comment.id), 'parent_id': str(parent.id) if parent else None})
 
     return redirect('posting:view_post', post_id=post_id)
+
+
+@require_http_methods(['POST'])
+def toggle_like(request, post_id):
+    from django.http import JsonResponse
+    post = get_object_or_404(Post, id=post_id)
+    user = get_current_user(request)
+    if not user:
+        return JsonResponse({'ok': False, 'error': '请先登录'}, status=401)
+    try:
+        like, created = PostLike.objects.get_or_create(user=user, post=post)
+        if not created:
+            like.delete()
+            liked = False
+        else:
+            liked = True
+            # 创建通知给文章作者
+            try:
+                from socials.models import Notification
+                from django.contrib.contenttypes.models import ContentType
+                ct = ContentType.objects.get_for_model(post.__class__)
+                if post.author.id != user.id:
+                    Notification.objects.create(user=post.author, actor=user, verb='点赞了你的文章', target_content_type=ct, target_object_id=str(post.id))
+            except Exception:
+                pass
+    except Exception:
+        return JsonResponse({'ok': False, 'error': '操作失败'}, status=500)
+
+    count = PostLike.objects.filter(post=post).count()
+    return JsonResponse({'ok': True, 'liked': liked, 'likes_count': count})
 
 def delete_post(request, post_id):
     """删除文章"""
@@ -277,10 +335,25 @@ def search_posts(request):
     page_obj = None
     
     if query:
-        # 搜索标题或标签名称
-        qs = Post.objects.filter(
-            Q(title__icontains=query) | Q(tags__name__icontains=query)
-        ).distinct().select_related('author').prefetch_related('tags').order_by('-created_at')
+        # 如果以 # 开头 -> 标签搜索（去掉前缀）；否则仅按标题搜索
+        if query.startswith('#'):
+            tag = query.lstrip('#').strip()
+            if tag:
+                qs = Post.objects.filter(
+                    Q(tags__name__icontains=tag)
+                ).distinct().select_related('author').prefetch_related('tags').order_by('-created_at')
+            else:
+                qs = Post.objects.none()
+        else:
+            # 限制查询内容，移除明显的特殊字符以防注入或无效查询
+            import re
+            safe_q = re.sub(r'[^\w\u4e00-\u9fff\s\-_:,\.\(\)]+', '', query)
+            if not safe_q:
+                qs = Post.objects.none()
+            else:
+                qs = Post.objects.filter(
+                    Q(title__icontains=safe_q)
+                ).distinct().select_related('author').prefetch_related('tags').order_by('-created_at')
         
         # 分页，每页 10 个
         paginator = Paginator(qs, 10)
@@ -309,3 +382,99 @@ def search_posts(request):
         'paginator': paginator,
     }
     return render(request, 'search_results.html', context)
+
+
+# --------------------
+# 解耦后的API视图
+# --------------------
+def api_post_detail(request, post_id):
+    """返回文章的 JSON 表示，包含原始 Markdown 与已渲染 HTML。"""
+    post = get_object_or_404(Post, id=post_id)
+    data = {
+        'id': str(post.id),
+        'title': post.title,
+        'content_raw': post.content_raw,
+        'content': post.content,
+        'author': post.author.username,
+        'author_avatar': post.author.avatar_url if getattr(post.author, 'avatar_url', None) else '',
+        'tags': list(post.tags.values_list('name', flat=True)),
+        'created_at': post.created_at.isoformat(),
+        'updated_at': post.updated_at.isoformat(),
+        'views_count': post.views_count,
+    }
+    return JsonResponse({'ok': True, 'post': data})
+
+
+def api_post_comments(request, post_id):
+    """返回文章下的所有评论（扁平列表），供前端渲染线程或树结构。"""
+    post = get_object_or_404(Post, id=post_id)
+    qs = Comment.objects.filter(post=post).order_by('created_at').select_related('author', 'parent')
+    comments = []
+    for c in qs:
+        comments.append({
+            'id': str(c.id),
+            'parent': str(c.parent.id) if c.parent else None,
+            'level': c.level,
+            'author': c.author.username,
+            'author_avatar': c.author.avatar_url if getattr(c.author, 'avatar_url', None) else '',
+            'author_profile_url': reverse('users:profile_user', args=[c.author.username]),
+            'content': c.content,
+            'content_raw': getattr(c, 'content_raw', c.content),
+            'created_at': c.created_at.isoformat(),
+        })
+    return JsonResponse({'ok': True, 'comments': comments})
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def api_add_comment_api(request, post_id):
+    """通过 JSON 创建评论（接受 {content, parent_id?}），返回创建后的评论 JSON。"""
+    post = get_object_or_404(Post, id=post_id)
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except Exception:
+        return JsonResponse({'ok': False, 'error': 'invalid json'}, status=400)
+
+    raw_md = (payload.get('content') or '').strip()
+    if not raw_md:
+        return JsonResponse({'ok': False, 'error': 'empty content'}, status=400)
+
+    parent = None
+    level = 0
+    parent_id = payload.get('parent_id')
+    if parent_id:
+        try:
+            parent = Comment.objects.get(id=parent_id, post=post)
+            level = parent.level + 1
+        except (Comment.DoesNotExist, ValueError):
+            parent = None
+            level = 0
+
+    user = get_current_user(request)
+    if not user:
+        return JsonResponse({'ok': False, 'error': 'authentication required'}, status=401)
+
+    html = markdownify(raw_md)
+    cleaned = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+
+    comment = Comment.objects.create(
+        post=post,
+        parent=parent,
+        level=level,
+        author=user,
+        content_raw=raw_md,
+        content=cleaned,
+    )
+
+    data = {
+        'id': str(comment.id),
+        'parent': str(parent.id) if parent else None,
+        'level': comment.level,
+        'author': comment.author.username,
+        'author_avatar': comment.author.avatar_url if getattr(comment.author, 'avatar_url', None) else '',
+        'author_profile_url': reverse('users:profile_user', args=[comment.author.username]),
+        'content': comment.content,
+        'content_raw': comment.content_raw if hasattr(comment, 'content_raw') else comment.content,
+        'created_at': comment.created_at.isoformat(),
+    }
+    return JsonResponse({'ok': True, 'comment': data})

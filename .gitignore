@@ -210,6 +210,9 @@ __marimo__/
 media/
 tools/
 
+# 忽略 GitHub 配置目录（按需）
+.github/
+
 # 外部 CDN 资源（本地化）- 这些文件从 CDN 动态下载，不应提交到版本控制
 # marked.js: https://cdn.jsdelivr.net/npm/marked/
 # cropperjs: https://cdn.jsdelivr.net/npm/cropperjs/

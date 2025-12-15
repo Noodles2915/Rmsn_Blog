@@ -1,0 +1,36 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>私信 - 一息博客</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
+<body>
+    <header>
+        <div class="brand"><h1>一息博客</h1></div>
+        <div class="header-actions">
+            {% url 'index' as index_url %}
+            <a href="{{ index_url }}" class="back-btn">← 返回首页</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <h2>私信</h2>
+        {% if messages %}
+            <ul class="message-list">
+            {% for m in messages %}
+                <li id="msg-{{ m.id }}" class="message-item {% if not m.is_read and m.recipient.id == user.id %}unread{% endif %}">
+                    <div class="msg-from">{{ m.sender.username }} → {{ m.recipient.username }}</div>
+                    <div class="msg-time">{{ m.created_at|date:"Y-m-d H:i" }}</div>
+                    <div class="msg-content">{{ m.content }}</div>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>暂无私信记录。</p>
+        {% endif %}
+    </main>
+</body>
+</html>

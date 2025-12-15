@@ -25,6 +25,7 @@ urlpatterns = [
     # 将 users 应用包含为命名空间，确保模板中使用 'users:...' 可被解析
     path('user/', include(('users.urls', 'users'), namespace='users')),
     path('post/', include(('posting.urls', 'posting'), namespace='posting')),
+    path('socials/', include(('socials.urls', 'socials'), namespace='socials')),
     path('', views.index, name='index'),
 ]
 

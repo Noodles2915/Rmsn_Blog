@@ -14,9 +14,42 @@
             <h1>一息博客</h1>
         </div>
 
+        <div class="header-search">
+            {% if user %}
+            <form method="get" action="{% url 'posting:search_posts' %}" class="quick-search-form">
+                <div class="search-input-group">
+                    <input 
+                        type="text" 
+                        name="q" 
+                        class="search-input" 
+                        placeholder="🔍 按标题或标签搜索..."
+                        required
+                    >
+                    <button type="submit" class="btn btn-primary">搜索</button>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+
         <div class="nav-shortcut">
                 {% if user %}
-                    <a class="user-link" href="{% url 'users:dashboard' %}">个人页 ({{ user.username }})</a>
+                    <div class="user-actions">
+                        <a href="{% url 'socials:notifications_list' %}" id="notif-link" class="icon-link">🔔 <span id="notif-count" class="badge" style="display:none;">0</span></a>
+                        <a href="{% url 'socials:messages_list' %}" id="msg-link" class="icon-link">✉️ <span id="msg-count" class="badge" style="display:none;">0</span></a>
+                    </div>
+                    <div class="user-dropdown" id="user-dropdown">
+                        <button class="user-toggle" id="user-toggle">
+                            <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="user-avatar">
+                            <span class="user-name">{{ user.username }}</span>
+                            <span class="chev">▾</span>
+                        </button>
+                        <div class="user-menu" id="user-menu" style="display:none;">
+                            <a class="user-menu-item" href="{% url 'users:dashboard' %}">仪表盘</a>
+                            <a class="user-menu-item" href="{% url 'users:profile_user' user.username %}">个人资料</a>
+                            <a class="user-menu-item" href="{% url 'users:profile_edit' %}">编辑资料</a>
+                            <a class="user-menu-item" href="{% url 'users:logout' %}">登出</a>
+                        </div>
+                    </div>
                 {% else %}
                     <a class="user-link" href="{% url 'users:login' %}">登录 / 注册</a>
                 {% endif %}
@@ -24,25 +57,7 @@
     </header>
 
     <main>
-        <!-- 搜索功能 -->
-        {% if user %}
-        <section class="search-section">
-            <div class="search-container">
-                <form method="get" action="{% url 'posting:search_posts' %}" class="quick-search-form">
-                    <div class="search-input-group">
-                        <input 
-                            type="text" 
-                            name="q" 
-                            class="search-input" 
-                            placeholder="🔍 按标题或标签搜索..."
-                            required
-                        >
-                        <button type="submit" class="btn btn-primary">搜索</button>
-                    </div>
-                </form>
-            </div>
-        </section>
-        {% endif %}
+        <!-- 搜索功能（已移至顶栏） -->
 
         <section>
             <h2 class="section-title">最新文章</h2>
@@ -67,5 +82,25 @@
     <footer>
         <div>© 2025 一息博客 • Django 出品</div>
     </footer>
+    <script>
+        (function(){
+            var toggle = document.getElementById('user-toggle');
+            var menu = document.getElementById('user-menu');
+            if (!toggle || !menu) return;
+                    document.addEventListener('click', function(e){
+                        if (toggle.contains(e.target)){
+                            menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'flex' : 'none';
+                            // 拉取未读通知与未读私信计数
+                            fetch('{% url "socials:notifications_count" %}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } }).then(r=>r.json()).then(function(d){ if (d && d.count){ var n = document.getElementById('notif-count'); n.textContent = d.count; n.style.display = d.count? 'inline-block':'none'; } });
+                            fetch('{% url "socials:notifications_count" %}'.replace('notifications/count/','messages/'), { headers: { 'X-Requested-With': 'XMLHttpRequest' } }).catch(function(){});
+                            return;
+                        }
+                        if (!menu.contains(e.target)){
+                            menu.style.display = 'none';
+                        }
+                    });
+            document.addEventListener('keydown', function(e){ if (e.key === 'Escape') menu.style.display = 'none'; });
+        })();
+    </script>
 </body>
 </html>

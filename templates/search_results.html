@@ -104,7 +104,8 @@
                             <div class="no-results">
                                 <div class="no-results-icon">🔍</div>
                                 <p>未找到与 "<strong>{{ query }}</strong>" 相关的文章</p>
-                                <p class="no-results-hint">试试更换搜索词或<a href="{% url 'index' %}">返回首页</a></p>
+                                {% url 'index' as index_url %}
+                                <p class="no-results-hint">试试更换搜索词或 {% include "_back_button.html" with url=index_url label="返回首页" %}</p>
                             </div>
                         {% endif %}
                     {% else %}

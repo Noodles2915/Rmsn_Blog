@@ -45,7 +45,8 @@
                     <ul class="action-list">
                         <li><a href="{% url 'posting:new_post' %}">✏️ 发布新文章</a></li>
                         <li><a href="{% url 'users:profile' %}">👤 查看个人页</a></li>
-                        <li><a href="{% url 'index' %}">🏠 返回首页</a></li>
+                        {% url 'index' as index_url %}
+                        <li><a href="{{ index_url }}" class="">🏠 返回首页</a></li>
                     </ul>
                 </div>
             </aside>
@@ -69,8 +70,8 @@
                             <div class="stat-label">收到评论</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-number">{{ views_count }}</div>
-                            <div class="stat-label">总浏览量</div>
+                            <div class="stat-number">{{ followers_count }}</div>
+                            <div class="stat-label">粉丝数</div>
                         </div>
                     </div>
 
