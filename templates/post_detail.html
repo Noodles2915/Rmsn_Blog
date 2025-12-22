@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ post.title }} - 一息博客</title>
+    <title>{{ post.title }}</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'netscript/editor.css' %}">
     <link rel="stylesheet" href="{% static 'netscript/waifu.css' %}">
@@ -67,6 +67,9 @@
                     </div>
                         <div class="post-meta-item">
                             📅 {{ post.created_at|date:"Y-m-d H:i" }}
+                        </div>
+                        <div class="post-meta-item">
+                            ⏱️ 约 {{ read_time }} 分钟
                         </div>
                         {% if is_updated %}
                             <div class="post-meta-item">

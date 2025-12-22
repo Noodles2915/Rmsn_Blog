@@ -20,8 +20,7 @@
         </div>
 
         <div class="header-right">
-            {% url 'users:dashboard' as dash_url %}
-            {% include "_back_button.html" with url=dash_url label="← 返回仪表盘" %}
+            <a href="{% url 'users:dashboard' %}" class="back-btn">← 返回仪表盘</a>
         </div>
     </header>
 

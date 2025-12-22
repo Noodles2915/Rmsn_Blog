@@ -56,11 +56,9 @@
                                         {% elif n.target_content_type.model == 'user' %}
                                             <!-- 关注通知无需额外链接 -->
                                         {% elif n.target_content_type.model == 'message' %}
-                                            {% with target_msg=n.target %}
-                                                {% if target_msg %}
-                                                    <span class="notif-target"><a href="{% url 'socials:messages_list' %}#msg-{{ target_msg.id }}">查看私信</a></span>
-                                                {% endif %}
-                                            {% endwith %}
+                                            {% if n.actor %}
+                                                <span class="notif-target"><a href="{% url 'socials:messages_list' %}?with={{ n.actor.username }}">查看对话</a></span>
+                                            {% endif %}
                                         {% endif %}
                                     {% endif %}
                                 </div>

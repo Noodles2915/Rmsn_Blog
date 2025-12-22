@@ -1,24 +1,99 @@
-{% extends "base.html" %}
+{% load static %}
+<!doctype html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>确认删除 - 一息博客</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <style>
+        .container-narrow {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .warning-icon {
+            font-size: 48px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .card h3 {
+            color: #dc2626;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .card p {
+            text-align: center;
+            color: var(--muted);
+            margin-bottom: 24px;
+        }
+        .post-info {
+            background: var(--bg);
+            padding: 16px;
+            border-radius: 8px;
+            margin: 24px 0;
+        }
+        .post-info strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        .post-info small {
+            color: var(--muted);
+        }
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 24px;
+        }
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand"><h1>一息博客</h1></div>
+        <div class="header-actions">
+            <a href="{% url 'users:dashboard' %}" class="back-btn">← 返回仪表盘</a>
+        </div>
+    </header>
 
-{% block title %}确认删除 - 一息博客{% endblock %}
-
-{% block head %}{% endblock %}
-
-{% block content %}
-    <div class="container-narrow">
+    <main class="container-narrow">
         <div class="card">
             <div class="card-header"><h2>⚠️ 确认删除文章</h2></div>
             <div class="card-body">
                 <div class="warning-icon">⚠️</div>
                 <h3>你确定要删除这篇文章吗？</h3>
                 <p>此操作无法撤销。删除后，文章及相关评论将永久移除。</p>
-                <div class="post-info"><strong>{{ post.title }}</strong><small>发布于 {{ post.created_at|date:"Y-m-d H:i" }}</small></div>
-                <form method="post">{% csrf_token %}
-                    <div class="form-actions"><button type="submit" class="btn btn-danger">删除文章</button><a href="{% url 'users:dashboard' %}" class="btn btn-secondary">取消</a></div>
+                <div class="post-info">
+                    <strong>{{ post.title }}</strong>
+                    <small>发布于 {{ post.created_at|date:"Y-m-d H:i" }}</small>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-danger">删除文章</button>
+                        <a href="{% url 'users:dashboard' %}" class="btn btn-secondary">取消</a>
+                    </div>
                 </form>
             </div>
         </div>
-    </div>
-{% endblock %}
+    </main>
 
-{% block scripts %}{% endblock %}
+    <footer>
+        <div>© 2025 一息博客 • Django 出品</div>
+    </footer>
+</body>
+</html>

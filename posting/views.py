@@ -132,6 +132,12 @@ def view_post(request, post_id):
     # 将标签列表与是否有更新之类的轻量信息在视图中计算好，简化模板判断
     tags = list(post.tags.values_list('name', flat=True))
     is_updated = post.updated_at != post.created_at
+    
+    # 计算预计阅读时间（字数/300，向上取整）
+    import math
+    content_text = post.content_raw if hasattr(post, 'content_raw') and post.content_raw else post.content
+    word_count = len(content_text)
+    read_time = math.ceil(word_count / 300) if word_count > 0 else 1
 
     # 评论与文章为独立模型时，不应依赖反向属性，改为直接查询 Comment
     # 查询顶级评论并预加载所有相关数据
@@ -159,6 +165,7 @@ def view_post(request, post_id):
         'is_updated': is_updated,
         'user': user,
         'user_liked': user_liked,
+        'read_time': read_time,
     }
     return render(request, 'post_detail.html', context)
 

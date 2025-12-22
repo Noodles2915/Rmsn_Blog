@@ -3,7 +3,7 @@
 
 For English Readers:[English](README_EN.md)
 
-简体中文说明 — 一个基于 Django 的简单博客示例项目。项目仅依赖 Django 本身（没有额外第三方包）。
+简体中文说明 — 一个基于 Django 的简单博客示例项目。
 
 **项目状态**: 教学/示例用途。适合学习 Django 项目结构、用户管理与简单帖子发布。
 
@@ -13,10 +13,11 @@ For English Readers:[English](README_EN.md)
 - `users/`: 用户相关的 app（注册、登录、用户模型或表单）。
 - `templates/`: 全局模板目录，包含 `index.html`, `login.html`, `register.html` 等。
 - `manage.py`: Django 管理脚本。
+- `social/`: 处理社交内容（私信，通知）。
 
 **依赖**:
+- 见`requirements.txt`。
 
-见`requirements.txt`.
 
 **快速开始（Windows PowerShell）**
 
@@ -26,58 +27,39 @@ python -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
 
-1) 安装 Django
+2) 安装 Django
 ```
 pip install Django
 ```
 
-1) 应用迁移并创建超级用户
+3) 应用迁移并创建超级用户
 ```
 python manage.py migrate
 python manage.py createsuperuser
 ```
 
-1) 启动开发服务器
+4) 启动开发服务器
 ```
 python manage.py runserver
 ```
 
-1) 打开浏览器访问 `http://127.0.0.1:8000/`。
+5) 打开浏览器访问 `http://127.0.0.1:8000/`。
 
-**运行测试**
-- 使用 Django 测试命令: `python manage.py test`。
-
-**项目说明（简要）**
+**项目说明**
 - 配置位于 `RmsnBlog/settings.py`。可在此调整 `INSTALLED_APPS`、模板路径、数据库（默认 SQLite）等。
+- 你需要配置环境变量`DJANGO_SKEY`等，具体见`settings.py`中相关的环境变量调用。
 - URL 路由定义在 `RmsnBlog/urls.py`，各 app 也有自己的 `urls.py`（如 `users/urls.py`）。
-- `posting` app 存放与帖子相关的逻辑；`users` app 管理用户登录/注册逻辑。
-- 模板文件主要放在项目根下的 `templates/` 以及各 app 的 `templates/` 子目录。
+- `posting` app 存放与帖子相关的逻辑；`users` app 管理用户登录/注册逻辑；`social`app管理用户间的互动通知和私信。
+- 模板文件都放在项目根下的 `templates/` 目录中。
 
-**部署提示（简要）**
+**部署提示**
 - 生产环境请使用 WSGI/ASGI 容器（如 Gunicorn + Nginx 或 Daphne + Nginx），并配置 `DEBUG=False` 与安全设置（`ALLOWED_HOSTS`、静态文件、数据库等）。
 - 在部署前运行 `python manage.py collectstatic`（若使用静态文件）。
+- 本项目的模板均使用了**静态css与js**，请在开始部署前根据对应需求下载。
+- 注意，这不是一个随时部署的项目，请自行完成一些内容的调整。
 
-**常见命令速查**
-- 迁移: `python manage.py migrate`
-- 创建迁移: `python manage.py makemigrations`
-- 运行开发服务器: `python manage.py runserver`
-- 创建超级用户: `python manage.py createsuperuser`
-- 运行测试: `python manage.py test`
-
-**文件/目录索引（快速参考）**
-- `manage.py` — 项目管理命令入口。
-- `RmsnBlog/settings.py` — 全局配置。
-- `RmsnBlog/urls.py` — 主路由表。
-- `posting/` — 博客 app（模型、视图、表单、管理面板相关）。
-- `users/` — 用户相关逻辑（登录、注册、表单）。
-- `templates/` — 全局模板文件。
-
-**静态脚本**
-本项目使用了网络上的静态脚本，由于无法确定开源协议是否允许在其它项目中挂载对应脚本，因此将相关内容放在下方.
-
-## 本地 JavaScript 和 CSS 资源清单
-
-### marked.min.js
+ **静态脚本需求**
+ ## marked.min.js
 - **来源**: https://cdn.jsdelivr.net/npm/marked/marked.min.js
 - **版本**: Latest (4.x)
 - **用途**: Markdown 文本解析器，用于实时预览 Markdown 内容
@@ -85,50 +67,22 @@ python manage.py runserver
   - `templates/new_post.html` - 发布新文章时实时预览
   - `templates/edit_post.html` - 编辑文章时实时预览
 
-### cropper.min.css
+## cropper.min.css
 - **来源**: https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css
 - **版本**: 1.5.13
 - **用途**: 图片裁剪工具的样式文件
 - **使用位置**: `templates/profile_edit.html` - 头像和背景图片裁剪
 
-### cropper.min.js
+## cropper.min.js
 - **来源**: https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js
 - **版本**: 1.5.13
 - **用途**: 图片裁剪工具的功能脚本
 - **使用位置**: `templates/profile_edit.html` - 头像和背景图片裁剪
 
-## 说明
+## live2d-widget
+- **来源**: https://github.com/stevenjoezhang/live2d-widget
+- **用途**: 文章详情页面的看板娘
+- **使用位置**: `templates/post_detail.html` - 看板娘
 
-所有文件都已通过模板中的 Django `{% static %}` 标签引用，确保在生产环境中可以正确加载。
-
-### 更新方法：
-
-如需更新这些文件，可以使用以下命令：
-
-```bash
-# 更新 marked.js
-powershell -Command "Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/npm/marked/marked.min.js' -OutFile 'static/netscript/marked.min.js'"
-
-# 更新 cropper.min.css
-powershell -Command "Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css' -OutFile 'static/netscript/cropper.min.css'"
-
-# 更新 cropper.min.js
-powershell -Command "Invoke-WebRequest -Uri 'https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js' -OutFile 'static/netscript/cropper.min.js'"
-```
-
-## 许可证
-
-这些库遵循各自的开源许可证：
-- **marked.js**: MIT License
-- **cropperjs**: MIT License
-
-## 验证码速率限制
-
-项目对验证码请求应用了多层速率限制以防止滥用：
-
-- **单邮箱冷却时间**: 60 秒（客户端和服务器均进行检查）
-- **IP 限制**: 默认每小时 10 次发送限制（服务器端）。超过限制时，端点返回 HTTP 429，并在响应中包含 `retry_after` 字段，指示需要等待的秒数。
-
-如需更强大或分布式的速率限制（例如基于 Redis 的计数器或外部速率限制服务），可扩展 `send_verification_code` 函数以使用共享缓存或 Redis。
 
 ---

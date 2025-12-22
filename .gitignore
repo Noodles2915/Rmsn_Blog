@@ -220,7 +220,9 @@ tools/
 static/netscript/marked*.js
 static/netscript/cropper*.js
 static/netscript/cropper*.css
-static/netscript/waifu*
+static/netscript/waifu-tips.js
+static/netscript/waifu-tips.js.map
+static/netscript/waifu.css
 static/netscript/live2d*
 static/netscript/chunk
 static/netscript/autoload.js

@@ -18,19 +18,38 @@
 
     <main class="container">
         <h2>私信</h2>
-        {% if messages %}
-            <ul class="message-list">
-            {% for m in messages %}
-                <li id="msg-{{ m.id }}" class="message-item {% if not m.is_read and m.recipient.id == user.id %}unread{% endif %}">
-                    <div class="msg-from">{{ m.sender.username }} → {{ m.recipient.username }}</div>
-                    <div class="msg-time">{{ m.created_at|date:"Y-m-d H:i" }}</div>
-                    <div class="msg-content">{{ m.content }}</div>
-                </li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>暂无私信记录。</p>
-        {% endif %}
+        <div class="messages-container">
+            {% if conversations %}
+                <ul class="conversation-list">
+                    {% for conv in conversations %}
+                        <li class="conversation-item {% if conv.unread_count > 0 %}has-unread{% endif %}">
+                            <a href="?with={{ conv.other_user.username }}" class="conversation-link">
+                                <div class="conv-avatar">
+                                    <img src="{{ conv.other_user.avatar_url }}" alt="{{ conv.other_user.username }}" class="avatar-thumb">
+                                    {% if conv.unread_count > 0 %}
+                                        <span class="unread-badge">{{ conv.unread_count }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="conv-content">
+                                    <div class="conv-header">
+                                        <span class="conv-username">{{ conv.other_user.username }}</span>
+                                        <span class="conv-time">{{ conv.last_message.created_at|date:"m-d H:i" }}</span>
+                                    </div>
+                                    <div class="conv-preview">
+                                        {% if conv.last_message.sender.id == user.id %}
+                                            <span class="me">我：</span>
+                                        {% endif %}
+                                        {{ conv.last_message.content|truncatechars:50 }}
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-state">暂无私信记录。</p>
+            {% endif %}
+        </div>
     </main>
 </body>
 </html>

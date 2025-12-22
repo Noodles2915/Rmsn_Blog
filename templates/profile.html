@@ -18,8 +18,7 @@
         </div>
 
         <div class="header-right">
-            {% url 'users:dashboard' as dash_url %}
-            {% include "_back_button.html" with url=dash_url label="← 返回仪表盘" %}
+            <a href="{% url 'users:dashboard' %}" class="back-btn">← 返回仪表盘</a>
         </div>
     </header>
 
@@ -70,9 +69,9 @@
                                 <a href="{% url 'users:profile_edit' %}" class="btn btn-primary">编辑信息</a>
                             {% else %}
                                 <button type="button" id="follow-btn" class="btn follow-btn {% if is_following %}following{% else %}follow{% endif %}" aria-pressed="{{ is_following|yesno:'true,false' }}" data-username="{{ user.username }}"{% if not is_following %} style="background-color: var(--accent); color: #fff;"{% endif %}><span class="icon">+</span> <span class="label">{{ is_following|yesno:"已关注,关注" }}</span></button>
+                                <a href="{% url 'socials:messages_list' %}?with={{ user.username }}" class="btn btn-secondary">💬 发私信</a>
                             {% endif %}
-                            {% url 'users:dashboard' as dash_url %}
-                            {% include "_back_button.html" with url=dash_url label="返回" extra_class="btn btn-secondary" %}
+                            <a href="{% url 'users:dashboard' %}" class="btn btn-secondary">返回</a>
                         </div>
                     </div>
                 </div>

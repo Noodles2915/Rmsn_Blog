@@ -228,10 +228,10 @@ def profile_edit(request):
                 request.session.pop('verification_code', None)
                 request.session.pop('verification_email', None)
                 form.save()
-                return redirect('users:profile')
+                return redirect('users:dashboard')
         elif form.is_valid():
             form.save()
-            return redirect('users:profile')
+            return redirect('users:dashboard')
     else:
         form = ProfileEditForm(instance=user)
 

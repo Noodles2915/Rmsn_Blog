@@ -87,9 +87,59 @@ def messages_list(request):
     user = get_current_user(request)
     if not user:
         return redirect('users:login')
-    # 简单列出近50条与该用户相关的会话（按最新消息排序）
-    qs = Message.objects.filter(Q(sender=user) | Q(recipient=user)).order_by('-created_at')[:100]
-    return render(request, 'messages_list.html', {'messages': qs, 'user': user})
+    
+    # 查看与特定用户的对话
+    chat_with = request.GET.get('with')
+    if chat_with:
+        try:
+            other_user = User.objects.get(username=chat_with)
+            # 标记来自对方的未读消息为已读
+            Message.objects.filter(sender=other_user, recipient=user, is_read=False).update(is_read=True)
+            # 获取双方的所有消息
+            qs = Message.objects.filter(
+                Q(sender=user, recipient=other_user) | Q(sender=other_user, recipient=user)
+            ).order_by('created_at')
+            # 分页
+            page_number = request.GET.get('page', 1)
+            paginator = Paginator(qs, 50)
+            page_obj = paginator.get_page(page_number)
+            return render(request, 'messages_chat.html', {
+                'messages': page_obj,
+                'page_obj': page_obj,
+                'other_user': other_user,
+                'user': user
+            })
+        except User.DoesNotExist:
+            pass
+    
+    # 获取所有对话列表（按最后一条消息时间排序）
+    # 获取所有相关用户
+    user_ids = set()
+    msgs = Message.objects.filter(Q(sender=user) | Q(recipient=user)).values('sender_id', 'recipient_id')
+    for m in msgs:
+        user_ids.add(m['sender_id'])
+        user_ids.add(m['recipient_id'])
+    user_ids.discard(user.id)
+    
+    # 为每个对话伙伴获取最后一条消息
+    conversations = []
+    for uid in user_ids:
+        other = User.objects.get(id=uid)
+        last_msg = Message.objects.filter(
+            Q(sender=user, recipient=other) | Q(sender=other, recipient=user)
+        ).order_by('-created_at').first()
+        if last_msg:
+            unread_count = Message.objects.filter(sender=other, recipient=user, is_read=False).count()
+            conversations.append({
+                'other_user': other,
+                'last_message': last_msg,
+                'unread_count': unread_count,
+            })
+    
+    # 按最后消息时间排序
+    conversations.sort(key=lambda x: x['last_message'].created_at, reverse=True)
+    
+    return render(request, 'messages_list.html', {'conversations': conversations, 'user': user})
 
 
 @require_POST
@@ -98,18 +148,38 @@ def send_message(request, username):
     if not user:
         return JsonResponse({'ok': False, 'error': '请先登录'}, status=401)
     recipient = get_object_or_404(User, username=username)
-    content = request.POST.get('content') or request.body.decode('utf-8')
+    
+    # 支持JSON和表单两种格式
+    try:
+        import json
+        payload = json.loads(request.body.decode('utf-8'))
+        content = payload.get('content', '')
+    except:
+        content = request.POST.get('content', '')
+    
     content = content.strip()
     if not content:
         return JsonResponse({'ok': False, 'error': '消息内容不能为空'}, status=400)
+    
     msg = Message.objects.create(sender=user, recipient=recipient, content=content)
-    # 创建通知给收件人，target 指向消息
+    
+    # 创建通知给收件人
     try:
         ct = ContentType.objects.get_for_model(msg.__class__)
         Notification.objects.create(user=recipient, actor=user, verb='向你发送了私信', target_content_type=ct, target_object_id=str(msg.id))
     except Exception:
         Notification.objects.create(user=recipient, actor=user, verb='向你发送了私信')
-    return JsonResponse({'ok': True, 'message_id': str(msg.id)})
+    
+    return JsonResponse({
+        'ok': True,
+        'message': {
+            'id': str(msg.id),
+            'content': msg.content,
+            'created_at': msg.created_at.isoformat(),
+            'sender': user.username,
+            'sender_avatar': user.avatar_url,
+        }
+    })
 from django.shortcuts import render
 
 # Create your views here.

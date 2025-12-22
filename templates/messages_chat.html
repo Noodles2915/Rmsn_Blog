@@ -1,0 +1,158 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>与 {{ other_user.username }} 的对话 - 一息博客</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
+<body>
+    <header>
+        <div class="brand"><h1>一息博客</h1></div>
+        <div class="header-actions">
+            <a href="{% url 'socials:messages_list' %}" class="back-btn">← 返回私信列表</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="chat-user-info">
+                    <img src="{{ other_user.avatar_url }}" alt="{{ other_user.username }}" class="avatar-thumb">
+                    <div>
+                        <h2>{{ other_user.username }}</h2>
+                        <a href="{% url 'users:profile_user' other_user.username %}" class="view-profile">查看主页</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chat-messages">
+                {% if messages.object_list %}
+                    {% for msg in messages.object_list %}
+                        <div class="message-bubble {% if msg.sender.id == user.id %}sent{% else %}received{% endif %}">
+                            <div class="message-avatar">
+                                <img src="{{ msg.sender.avatar_url }}" alt="{{ msg.sender.username }}" class="avatar-mini">
+                            </div>
+                            <div class="message-content-wrapper">
+                                <div class="message-text">{{ msg.content }}</div>
+                                <div class="message-time">{{ msg.created_at|date:"m-d H:i" }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="empty-state">还没有消息，开始对话吧！</p>
+                {% endif %}
+            </div>
+
+            {% if page_obj.has_other_pages %}
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?with={{ other_user.username }}&page=1" class="page-link">首页</a>
+                        <a href="?with={{ other_user.username }}&page={{ page_obj.previous_page_number }}" class="page-link">上一页</a>
+                    {% endif %}
+                    <span class="page-info">第 {{ page_obj.number }} / {{ page_obj.paginator.num_pages }} 页</span>
+                    {% if page_obj.has_next %}
+                        <a href="?with={{ other_user.username }}&page={{ page_obj.next_page_number }}" class="page-link">下一页</a>
+                        <a href="?with={{ other_user.username }}&page={{ page_obj.paginator.num_pages }}" class="page-link">末页</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <div class="chat-input-container">
+                <form id="send-message-form" class="chat-input-form">
+                    {% csrf_token %}
+                    <textarea id="message-input" name="content" placeholder="输入消息..." rows="3" required></textarea>
+                    <button type="submit" class="btn btn-primary send-btn">发送</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        (function(){
+            function getCookie(name){
+                var v=document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)');
+                return v ? v.pop() : '';
+            }
+
+            var form = document.getElementById('send-message-form');
+            var input = document.getElementById('message-input');
+            var messagesContainer = document.getElementById('chat-messages');
+
+            // 滚动到底部
+            function scrollToBottom() {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+            scrollToBottom();
+
+            form.addEventListener('submit', function(e){
+                e.preventDefault();
+                var content = input.value.trim();
+                if (!content) return;
+
+                var btn = form.querySelector('.send-btn');
+                if (btn._busy) return;
+                btn._busy = true;
+                btn.disabled = true;
+                btn.textContent = '发送中...';
+
+                var url = '{% url "socials:send_message" other_user.username %}';
+                var csrftoken = getCookie('csrftoken');
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ content: content })
+                })
+                .then(function(res){ return res.json(); })
+                .then(function(data){
+                    if (data && data.ok) {
+                        // 添加新消息到界面
+                        var bubble = document.createElement('div');
+                        bubble.className = 'message-bubble sent';
+                        bubble.innerHTML = '<div class="message-avatar">' +
+                            '<img src="' + data.message.sender_avatar + '" alt="' + data.message.sender + '" class="avatar-mini">' +
+                            '</div>' +
+                            '<div class="message-content-wrapper">' +
+                            '<div class="message-text">' + escapeHtml(data.message.content) + '</div>' +
+                            '<div class="message-time">刚刚</div>' +
+                            '</div>';
+                        messagesContainer.appendChild(bubble);
+                        input.value = '';
+                        scrollToBottom();
+                    } else {
+                        alert(data.error || '发送失败');
+                    }
+                })
+                .catch(function(err){
+                    console.error('发送消息失败', err);
+                    alert('发送失败，请重试');
+                })
+                .finally(function(){
+                    btn._busy = false;
+                    btn.disabled = false;
+                    btn.textContent = '发送';
+                });
+            });
+
+            function escapeHtml(text) {
+                var div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // 支持Ctrl+Enter发送
+            input.addEventListener('keydown', function(e){
+                if (e.ctrlKey && e.key === 'Enter') {
+                    form.dispatchEvent(new Event('submit'));
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
