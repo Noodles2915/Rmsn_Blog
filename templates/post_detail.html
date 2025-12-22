@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ post.title }} - 一息博客</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'netscript/editor.css' %}">
 </head>
 <body>
     <header>
@@ -138,9 +139,30 @@ document.addEventListener('DOMContentLoaded', function(){
                 <form method="post" action="{% url 'posting:add_comment' post.id %}">
                     {% csrf_token %}
                     <input type="hidden" name="parent_id" value="">
-                    <div class="form-group">
+                    <div class="form-group markdown-editor-group">
                         <label for="comment-content">写下你的评论 (支持 Markdown)</label>
-                        <textarea id="comment-content" name="content" rows="6" placeholder="在此输入评论，支持 Markdown 格式..."></textarea>
+                        <div class="markdown-editor-container">
+                            <div class="editor-toolbar" data-target="comment-content">
+                                <button type="button" class="tool" data-action="bold">B</button>
+                                <button type="button" class="tool" data-action="italic">I</button>
+                                <button type="button" class="tool" data-action="h1">H1</button>
+                                <button type="button" class="tool" data-action="h2">H2</button>
+                                <button type="button" class="tool" data-action="ul">• List</button>
+                                <button type="button" class="tool" data-action="ol">1. List</button>
+                                <button type="button" class="tool" data-action="quote">"</button>
+                                <button type="button" class="tool" data-action="code">{} </button>
+                                <button type="button" class="tool" data-action="link">🔗</button>
+                                <button type="button" class="tool" data-action="image">🖼</button>
+                                <button type="button" class="tool" data-action="preview-toggle">预览</button>
+                            </div>
+                            <div class="editor-area">
+                                <textarea id="comment-content" name="content" rows="6" placeholder="在此输入评论，支持 Markdown 格式..."></textarea>
+                                <div id="comment-markdown-preview" class="markdown-preview preview-layer hidden">
+                                    <div class="preview-label">预览</div>
+                                    <div id="comment-preview-content" class="preview-content"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">发表评论</button>
@@ -181,6 +203,7 @@ document.addEventListener('DOMContentLoaded', function(){
         <div>© 2025 一息博客 • Django 出品</div>
     </footer>
     <script src="{% static 'netscript/marked.min.js' %}"></script>
+    <script src="{% static 'netscript/editor.js' %}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function(){
             // 用户下拉菜单切换（如果存在）
@@ -349,6 +372,7 @@ document.addEventListener('DOMContentLoaded', function(){
                 var replyBtn = document.createElement('button');
                 replyBtn.className = 'btn-reply comment-action';
                 replyBtn.setAttribute('data-comment-id', node.id);
+                replyBtn.setAttribute('data-author', node.author || '');
                 replyBtn.textContent = '回复';
                 var delBtn = document.createElement('button');
                 delBtn.className = 'btn-delete-comment comment-action';
@@ -381,10 +405,25 @@ document.addEventListener('DOMContentLoaded', function(){
             }
 
             // 点击回复：在占位容器内插入一个回复表单（委托绑定）
-            function createReplyForm(parentId){
+            function createReplyForm(parentId, authorName){
                 var html = [];
                 html.push('<form class="reply-form-local" data-parent-id="' + parentId + '">');
-                html.push('<textarea name="content" rows="3" placeholder="在此输入回复，支持 Markdown..."></textarea>');
+                html.push('<div class="markdown-editor-container">');
+                html.push('<div class="editor-toolbar" data-target="reply-ta-' + parentId + '">');
+                html.push('<button type="button" class="tool" data-action="bold">B</button>');
+                html.push('<button type="button" class="tool" data-action="italic">I</button>');
+                html.push('<button type="button" class="tool" data-action="h2">H2</button>');
+                html.push('<button type="button" class="tool" data-action="ul">• List</button>');
+                html.push('<button type="button" class="tool" data-action="quote">"</button>');
+                html.push('<button type="button" class="tool" data-action="code">{} </button>');
+                html.push('<button type="button" class="tool" data-action="link">🔗</button>');
+                html.push('<button type="button" class="tool" data-action="preview-toggle">预览</button>');
+                html.push('</div>');
+                html.push('<div class="editor-area">');
+                var placeholder = authorName ? '回复 @' + authorName + '...' : '在此输入回复，支持 Markdown...';
+                html.push('<textarea id="reply-ta-' + parentId + '" name="content" rows="3" placeholder="' + placeholder + '"></textarea>');
+                html.push('<div id="reply-preview-' + parentId + '" class="markdown-preview preview-layer hidden"><div class="preview-label">预览</div><div class="preview-content" id="reply-preview-content-' + parentId + '"></div></div>');
+                html.push('</div>');
                 html.push('<div class="form-actions"><button class="btn btn-primary" type="submit">提交回复</button> <button type="button" class="btn-cancel-reply btn btn-secondary" data-comment-id="' + parentId + '">取消</button></div>');
                 html.push('</form>');
                 return html.join('');
@@ -397,10 +436,11 @@ document.addEventListener('DOMContentLoaded', function(){
                     btn.addEventListener('click', function(e){
                         e.preventDefault();
                         var cid = this.getAttribute('data-comment-id');
+                        var author = this.getAttribute('data-author') || '';
                         var container = document.getElementById('reply-form-' + cid);
                         if (!container) return;
                         if (container.innerHTML.trim() === ''){
-                            container.innerHTML = createReplyForm(cid);
+                            container.innerHTML = createReplyForm(cid, author);
                             // 绑定本地表单提交
                             var f = container.querySelector('form');
                             if (f) bindLocalReplyForm(f);

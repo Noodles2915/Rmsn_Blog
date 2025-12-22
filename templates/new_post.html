@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>发布新文章 - 一息博客</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'netscript/editor.css' %}">
 </head>
 <body>
     <header>
@@ -67,10 +68,25 @@
                     <div class="form-group markdown-editor-group">
                         <label for="id_content">文章内容 * (Markdown 格式)</label>
                         <div class="markdown-editor-container">
-                            <textarea id="id_content" name="content" placeholder="在此输入文章内容，支持 Markdown 格式..." class="markdown-textarea"></textarea>
-                            <div id="markdown-preview" class="markdown-preview">
-                                <div class="preview-label">预览</div>
-                                <div id="preview-content" class="preview-content"></div>
+                            <div class="editor-toolbar" data-target="id_content">
+                                <button type="button" class="tool" data-action="bold">B</button>
+                                <button type="button" class="tool" data-action="italic">I</button>
+                                <button type="button" class="tool" data-action="h1">H1</button>
+                                <button type="button" class="tool" data-action="h2">H2</button>
+                                <button type="button" class="tool" data-action="ul">• List</button>
+                                <button type="button" class="tool" data-action="ol">1. List</button>
+                                <button type="button" class="tool" data-action="quote">"</button>
+                                <button type="button" class="tool" data-action="code">{} </button>
+                                <button type="button" class="tool" data-action="link">🔗</button>
+                                <button type="button" class="tool" data-action="image">🖼</button>
+                                <button type="button" class="tool" data-action="preview-toggle">预览</button>
+                            </div>
+                            <div class="editor-area">
+                                <textarea id="id_content" name="content" placeholder="在此输入文章内容，支持 Markdown 格式..." class="markdown-textarea"></textarea>
+                                <div id="markdown-preview" class="markdown-preview preview-layer hidden">
+                                    <div class="preview-label">预览</div>
+                                    <div id="preview-content" class="preview-content"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -91,6 +107,7 @@
     </footer>
 
     <script src="{% static 'netscript/marked.min.js' %}"></script>
+    <script src="{% static 'netscript/editor.js' %}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function(){
             // 实时预览功能

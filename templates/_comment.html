@@ -29,7 +29,25 @@
             <form method="post" action="{% url 'posting:add_comment' post.id %}" class="reply-form">
                 {% csrf_token %}
                 <input type="hidden" name="parent_id" value="{{ comment.id }}">
-                <textarea name="content" rows="4" placeholder="在此输入回复，支持 Markdown..."></textarea>
+                <div class="markdown-editor-container">
+                    <div class="editor-toolbar" data-target="reply-ta-{{ comment.id }}">
+                        <button type="button" class="tool" data-action="bold">B</button>
+                        <button type="button" class="tool" data-action="italic">I</button>
+                        <button type="button" class="tool" data-action="h2">H2</button>
+                        <button type="button" class="tool" data-action="ul">• List</button>
+                        <button type="button" class="tool" data-action="quote">"</button>
+                        <button type="button" class="tool" data-action="code">{} </button>
+                        <button type="button" class="tool" data-action="link">🔗</button>
+                        <button type="button" class="tool" data-action="preview-toggle">预览</button>
+                    </div>
+                    <div class="editor-area">
+                        <textarea id="reply-ta-{{ comment.id }}" name="content" rows="4" placeholder="回复 @{{ comment.author.username }}..."></textarea>
+                        <div id="reply-preview-{{ comment.id }}" class="markdown-preview preview-layer hidden">
+                            <div class="preview-label">预览</div>
+                            <div class="preview-content" id="reply-preview-content-{{ comment.id }}"></div>
+                        </div>
+                    </div>
+                </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">提交回复</button>
                     <button type="button" class="btn-cancel-reply btn btn-secondary" data-comment-id="{{ comment.id }}">取消</button>
