@@ -216,6 +216,11 @@ tools/
 # 外部 CDN 资源（本地化）- 这些文件从 CDN 动态下载，不应提交到版本控制
 # marked.js: https://cdn.jsdelivr.net/npm/marked/
 # cropperjs: https://cdn.jsdelivr.net/npm/cropperjs/
+# live2d-widget: https://github.com/stevenjoezhang/live2d-widget
 static/netscript/marked*.js
 static/netscript/cropper*.js
 static/netscript/cropper*.css
+static/netscript/waifu*
+static/netscript/live2d*
+static/netscript/chunk
+static/netscript/autoload.js

@@ -19,42 +19,93 @@
     <main class="container">
         <h2>通知</h2>
         <div class="notifications-list">
-            {% if notifications %}
-                <ul>
+            {% if notifications.object_list %}
+                <ul class="notif-list">
                     {% for n in notifications %}
                         <li class="notif-item {% if n.unread %}unread{% endif %}">
-                            <div class="notif-verb">
-                                {% if n.actor %}{{ n.actor.username }}{% endif %} {{ n.verb }}
-                                {% if n.target_content_type and n.target_object_id %}
-                                    {% if n.target_content_type.model == 'post' %}
-                                        — <a href="{% url 'posting:view_post' n.target_object_id %}">查看文章</a>
-                                    {% elif n.target_content_type.model == 'comment' %}
-                                        {% with target_comment=n.target %}
-                                            {% if target_comment %}
-                                                — <a href="{% url 'posting:view_post' target_comment.post.id %}#comment-{{ target_comment.id }}">查看评论</a>
-                                            {% endif %}
-                                        {% endwith %}
-                                    {% elif n.target_content_type.model == 'user' %}
-                                        — <a href="{% url 'users:profile_user' n.target_object_id %}">查看个人页</a>
-                                    {% elif n.target_content_type.model == 'message' or n.target_content_type.model == 'message' %}
-                                        {% with target_msg=n.target %}
-                                            {% if target_msg %}
-                                                — <a href="{% url 'socials:messages_list' %}#msg-{{ target_msg.id }}">查看私信</a>
-                                            {% endif %}
-                                        {% endwith %}
-                                    {% else %}
-                                        <!-- 其他类型暂无处理 -->
-                                    {% endif %}
+                            <div class="notif-avatar">
+                                {% if n.actor %}
+                                    <a href="{% url 'users:profile_user' n.actor.username %}">
+                                        <img src="{{ n.actor.avatar_url }}" alt="{{ n.actor.username }}" class="avatar-thumb">
+                                    </a>
+                                {% else %}
+                                    <img src="{% static 'avatar/blank-pfp.png' %}" alt="系统" class="avatar-thumb">
                                 {% endif %}
                             </div>
-                            <div class="notif-time">{{ n.created_at|date:"Y-m-d H:i" }}</div>
+                            <div class="notif-content">
+                                <div class="notif-text">
+                                    {% if n.actor %}
+                                        <a href="{% url 'users:profile_user' n.actor.username %}" class="notif-actor">{{ n.actor.username }}</a>
+                                    {% else %}
+                                        <span class="notif-actor">系统</span>
+                                    {% endif %}
+                                    <span class="notif-verb">{{ n.verb }}</span>
+                                    {% if n.target_content_type and n.target_object_id %}
+                                        {% if n.target_content_type.model == 'post' %}
+                                            {% with target_post=n.target %}
+                                                {% if target_post %}
+                                                    <span class="notif-target">文章《<a href="{% url 'posting:view_post' target_post.id %}">{{ target_post.title }}</a>》</span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        {% elif n.target_content_type.model == 'comment' %}
+                                            {% with target_comment=n.target %}
+                                                {% if target_comment and target_comment.post %}
+                                                    <span class="notif-target">文章《<a href="{% url 'posting:view_post' target_comment.post.id %}#comment-{{ target_comment.id }}">{{ target_comment.post.title }}</a>》</span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        {% elif n.target_content_type.model == 'user' %}
+                                            <!-- 关注通知无需额外链接 -->
+                                        {% elif n.target_content_type.model == 'message' %}
+                                            {% with target_msg=n.target %}
+                                                {% if target_msg %}
+                                                    <span class="notif-target"><a href="{% url 'socials:messages_list' %}#msg-{{ target_msg.id }}">查看私信</a></span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                <div class="notif-time">{{ n.created_at|date:"Y-m-d H:i" }}</div>
+                            </div>
                         </li>
                     {% endfor %}
                 </ul>
             {% else %}
                 <p>暂无通知。</p>
             {% endif %}
+            
+            {% if page_obj.has_other_pages %}
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1" class="page-link">首页</a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="page-link">上一页</a>
+                    {% endif %}
+                    
+                    <span class="page-info">第 {{ page_obj.number }} / {{ page_obj.paginator.num_pages }} 页</span>
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="page-link">下一页</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">末页</a>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     </main>
+    <script>
+        // Auto-refresh notification count every 30 seconds
+        setInterval(function() {
+            fetch('{% url "socials:notifications_count" %}', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data && data.count !== undefined) {
+                    // Update count in title
+                    var baseTitle = '通知 - 一息博客';
+                    document.title = data.count > 0 ? '(' + data.count + ') ' + baseTitle : baseTitle;
+                }
+            })
+            .catch(err => console.error('Failed to refresh notification count', err));
+        }, 30000);
+    </script>
 </body>
 </html>

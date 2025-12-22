@@ -7,6 +7,7 @@
     <title>{{ post.title }} - 一息博客</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'netscript/editor.css' %}">
+    <link rel="stylesheet" href="{% static 'netscript/waifu.css' %}">
 </head>
 <body>
     <header>
@@ -22,8 +23,16 @@
                 <a href="{% url 'index' %}" class="back-btn">← 返回首页</a>
                 {% if user %}
                     <div class="user-actions">
-                        <a href="{% url 'socials:notifications_list' %}" id="notif-link" class="icon-link">🔔 <span id="notif-count" class="badge" style="display:none;">0</span></a>
-                        <a href="{% url 'socials:messages_list' %}" id="msg-link" class="icon-link">✉️ <span id="msg-count" class="badge" style="display:none;">0</span></a>
+                        <a href="{% url 'socials:notifications_list' %}" id="notif-link" class="action-btn">
+                            <span class="action-icon">🔔</span>
+                            <span class="action-text">通知</span>
+                            <span id="notif-count" class="badge" style="display:none;">0</span>
+                        </a>
+                        <a href="{% url 'socials:messages_list' %}" id="msg-link" class="action-btn">
+                            <span class="action-icon">✉️</span>
+                            <span class="action-text">私信</span>
+                            <span id="msg-count" class="badge" style="display:none;">0</span>
+                        </a>
                     </div>
                     <div class="user-dropdown" id="user-dropdown">
                         <button class="user-toggle" id="user-toggle">
@@ -80,23 +89,43 @@
             </div>
 
             <footer class="post-footer">
-                <div>
+                <div class="post-footer-meta">
                     <small>本文由 <a href="{% url 'users:profile_user' post.author.username %}" class="accent-link">{{ post.author.username }}</a> 发布</small>
-                    <button type="button" id="like-btn" class="btn btn-secondary{% if user_liked %} liked{% endif %}" data-post-id="{{ post.id }}"><span class="icon" id="like-icon">❤</span> <span id="likes-count">{{ post.likes.count }}</span></button>
                 </div>
-                <div class="post-actions">
-                    <a href="{% url 'index' %}" class="btn">← 返回首页</a>
+                <div class="post-footer-actions">
+                    <button type="button" id="like-btn" class="btn btn-secondary{% if user_liked %} liked{% endif %}" data-post-id="{{ post.id }}">
+                        <span class="like-icon" id="like-icon">{% if user_liked %}❤{% else %}🤍{% endif %}</span>
+                        <span id="likes-count">{{ post.likes.count }}</span>
+                    </button>
+                    <button type="button" id="share-btn" class="btn btn-secondary" title="分享这篇文章">
+                        <span class="share-icon">🔗</span>
+                        <span>分享</span>
+                    </button>
+                    <a href="{% url 'index' %}" class="btn btn-secondary">← 返回首页</a>
                 </div>
             </footer>
 <script>
-// like button handler
+// like button handler with enhanced animation
 document.addEventListener('DOMContentLoaded', function(){
     var likeBtn = document.getElementById('like-btn');
     if(!likeBtn) return;
+    
+    // Create floating hearts animation
+    function createFloatingHeart(x, y) {
+        var heart = document.createElement('span');
+        heart.textContent = '❤';
+        heart.className = 'floating-heart';
+        heart.style.left = x + 'px';
+        heart.style.top = y + 'px';
+        document.body.appendChild(heart);
+        setTimeout(function(){ heart.remove(); }, 1000);
+    }
+    
     likeBtn.addEventListener('click', function(e){
         if (likeBtn._busy) return;
         likeBtn._busy = true;
         var postId = likeBtn.getAttribute('data-post-id');
+        var rect = likeBtn.getBoundingClientRect();
         var csrftoken = (function(){
             var name = 'csrftoken=';
             var ca = document.cookie.split(';');
@@ -116,16 +145,65 @@ document.addEventListener('DOMContentLoaded', function(){
                 document.getElementById('likes-count').textContent = data.likes_count;
                 if (data.liked) {
                     likeBtn.classList.add('liked');
-                    if (icon) { icon.classList.add('pop'); setTimeout(function(){ icon.classList.remove('pop'); }, 380); }
+                    if (icon) { 
+                        icon.textContent = '❤';
+                        icon.classList.add('like-bounce'); 
+                        setTimeout(function(){ icon.classList.remove('like-bounce'); }, 600); 
+                    }
+                    // Create multiple floating hearts
+                    for(var i=0; i<3; i++){
+                        setTimeout(function(){ createFloatingHeart(rect.left + rect.width/2, rect.top); }, i * 100);
+                    }
                 } else {
                     likeBtn.classList.remove('liked');
-                    if (icon) { icon.classList.add('shrink'); setTimeout(function(){ icon.classList.remove('shrink'); }, 240); }
+                    if (icon) { 
+                        icon.textContent = '🤍';
+                        icon.classList.add('like-shrink'); 
+                        setTimeout(function(){ icon.classList.remove('like-shrink'); }, 300); 
+                    }
                 }
             } else if (data && data.error) {
                 alert(data.error);
             }
         }).catch(function(){ /* ignore */ }).finally(function(){ likeBtn._busy = false; });
     });
+    
+    // Share button handler
+    var shareBtn = document.getElementById('share-btn');
+    if(shareBtn){
+        shareBtn.addEventListener('click', function(e){
+            e.preventDefault();
+            var url = window.location.href;
+            var title = document.querySelector('.post-title').textContent;
+            var shareText = title + ' - ' + url;
+            
+            // Try modern Web Share API first
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    text: '分享这篇精彩的文章',
+                    url: url
+                }).catch(function(err){ /* user cancelled */ });
+            } else if (navigator.clipboard) {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(url).then(function(){
+                    // Show success feedback
+                    var originalText = shareBtn.innerHTML;
+                    shareBtn.innerHTML = '<span class="share-icon">✓</span><span>已复制链接</span>';
+                    shareBtn.classList.add('share-success');
+                    setTimeout(function(){
+                        shareBtn.innerHTML = originalText;
+                        shareBtn.classList.remove('share-success');
+                    }, 2000);
+                }).catch(function(err){
+                    alert('复制失败，请手动复制链接：' + url);
+                });
+            } else {
+                // Fallback for older browsers
+                prompt('复制下方链接进行分享：', url);
+            }
+        });
+    }
 });
 </script>
         </article>
@@ -222,6 +300,40 @@ document.addEventListener('DOMContentLoaded', function(){
                     }
                 });
                 document.addEventListener('keydown', function(e){ if (e.key === 'Escape') menu.style.display = 'none'; });
+                
+                // Auto-refresh notification and message counts every 30 seconds
+                function refreshCounts() {
+                    fetch('{% url "socials:notifications_count" %}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                        .then(r => r.json())
+                        .then(function(d) {
+                            if (d && d.count !== undefined) {
+                                var n = document.getElementById('notif-count');
+                                if (n) {
+                                    n.textContent = d.count;
+                                    n.style.display = d.count ? 'inline-block' : 'none';
+                                }
+                            }
+                        })
+                        .catch(err => console.error('Failed to refresh notification count', err));
+                    
+                    fetch('{% url "socials:messages_count" %}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                        .then(r => r.json())
+                        .then(function(d) {
+                            if (d && d.count !== undefined) {
+                                var m = document.getElementById('msg-count');
+                                if (m) {
+                                    m.textContent = d.count;
+                                    m.style.display = d.count ? 'inline-block' : 'none';
+                                }
+                            }
+                        })
+                        .catch(err => console.error('Failed to refresh message count', err));
+                }
+                
+                // Initial refresh
+                refreshCounts();
+                // Refresh every 30 seconds
+                setInterval(refreshCounts, 30000);
             })();
             // 清空按钮功能
             var clearBtn = document.getElementById('btn-clear-comment');
@@ -513,5 +625,7 @@ document.addEventListener('DOMContentLoaded', function(){
             
         });
     </script>
+    <script src="{% static 'netscript/live2d.min.js' %}"></script>
+    <script src="{% static 'netscript/autoload.js' %}"></script>
 </body>
 </html>

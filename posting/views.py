@@ -466,6 +466,21 @@ def api_add_comment_api(request, post_id):
         content=cleaned,
     )
 
+    # 创建通知：如果发表评论的人不是文章作者，通知文章作者
+    try:
+        from socials.models import Notification
+        from django.contrib.contenttypes.models import ContentType
+        # 通知文章作者，target 指向 Post
+        if post.author.id != user.id:
+            ct = ContentType.objects.get_for_model(post.__class__)
+            Notification.objects.create(user=post.author, actor=user, verb='评论了你的文章', target_content_type=ct, target_object_id=str(post.id))
+        # 如果是回复，通知父评论作者（且不重复通知文章作者）
+        if parent and parent.author.id != user.id and parent.author.id != post.author.id:
+            ct_c = ContentType.objects.get_for_model(parent.__class__)
+            Notification.objects.create(user=parent.author, actor=user, verb='回复了你的评论', target_content_type=ct_c, target_object_id=str(parent.id))
+    except Exception:
+        pass
+
     data = {
         'id': str(comment.id),
         'parent': str(parent.id) if parent else None,

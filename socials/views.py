@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_POST
+from django.core.paginator import Paginator
 from users.views import get_current_user
 from .models import Follow, Notification, Message
 from users.models import User
@@ -24,12 +25,8 @@ def toggle_follow(request, username):
         following = False
     else:
         following = True
-        # 创建通知，target 指向被关注的用户
-        try:
-            ct = ContentType.objects.get_for_model(target.__class__)
-            Notification.objects.create(user=target, actor=user, verb=f"关注了你", target_content_type=ct, target_object_id=str(target.id))
-        except Exception:
-            Notification.objects.create(user=target, actor=user, verb=f"关注了你")
+        # 创建通知，不需要 target 因为 actor 已经指向被关注的用户
+        Notification.objects.create(user=target, actor=user, verb=f"关注了你")
     followers_count = Follow.objects.filter(followed=target).count()
     return JsonResponse({'ok': True, 'following': following, 'followers_count': followers_count})
 
@@ -38,8 +35,20 @@ def notifications_list(request):
     user = get_current_user(request)
     if not user:
         return redirect('users:login')
-    qs = Notification.objects.filter(user=user).order_by('-created_at')[:50]
-    return render(request, 'notifications_list.html', {'notifications': qs, 'user': user})
+    qs = Notification.objects.filter(user=user).order_by('-created_at')
+    # Mark all unread notifications as read when user views the list
+    Notification.objects.filter(user=user, unread=True).update(unread=False)
+    
+    # Pagination: 10 per page
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(qs, 10)
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'notifications_list.html', {
+        'notifications': page_obj,
+        'page_obj': page_obj,
+        'user': user
+    })
 
 
 @require_POST
