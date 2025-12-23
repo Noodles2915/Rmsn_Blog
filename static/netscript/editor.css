@@ -1,19 +1,88 @@
 /* Editor toolbar above, preview as overlay behind the textarea */
-.markdown-editor-container{display:flex;flex-direction:column;min-height:400px}
+.markdown-editor-container{display:flex;flex-direction:column;min-height:auto}
+.markdown-editor-container.editor-large{min-height:400px}
 .editor-toolbar{display:flex;gap:6px;margin:0 0 8px 0;flex-shrink:0}
-.editor-toolbar .tool{background:#f5f5f5;border:1px solid #e6e6e6;padding:6px 8px;border-radius:4px;cursor:pointer}
-.editor-toolbar .tool:hover{background:#eee}
+.editor-toolbar .tool{background:var(--card);border:1px solid var(--border);padding:6px 8px;border-radius:4px;cursor:pointer;color:var(--text);position:relative}
+.editor-toolbar .tool:hover{background:var(--hover-bg)}
 
-/* editor-area holds a preview layer (rendered HTML) behind the textarea */
-.editor-area{position:relative;flex:1;display:flex}
-.preview-layer{position:absolute;top:0;left:0;right:0;bottom:0;padding:10px;border:1px solid #eee;background:#fff;border-radius:6px;overflow:auto;pointer-events:none;z-index:1}
-.preview-layer .preview-label{font-size:12px;color:#666;margin-bottom:6px}
-.preview-layer .preview-content{padding:6px}
-.preview-layer .preview-content{white-space:pre-wrap;word-wrap:break-word}
+/* preview toggle button visual state */
+.editor-toolbar .tool.preview-btn{display:inline-flex;align-items:center;justify-content:center}
+.editor-toolbar .tool.preview-btn.active,
+.editor-toolbar .tool.preview-btn[aria-pressed="true"]{
+	/* No visual highlight - keep button appearance consistent across themes */
+	background: var(--card);
+	color: var(--text);
+	border-color: var(--border);
+}
 
-/* textarea sits above the preview, with transparent text so user sees rendered HTML
-   caret-color keeps cursor visible while typing */
-.markdown-textarea{position:absolute;top:0;left:0;right:0;bottom:0;z-index:2;padding:10px;border:1px solid #ddd;border-radius:6px;background:#fff;resize:none!important;outline:none;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Noto Mono", monospace;white-space:pre-wrap;word-wrap:break-word;caret-color:#111;box-sizing:border-box;overflow:auto}
+/* 非预览状态：在图标上绘制一条斜线，表示“不可见/关闭” */
+.editor-toolbar .tool.preview-btn::after{
+	content: '';
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 60%;
+	height: 2px;
+	background: currentColor;
+	transform: translate(-50%, -50%) rotate(-45deg);
+	opacity: 0.9;
+	border-radius: 1px;
+	z-index: 4;
+	transition: opacity 0.12s ease, transform 0.12s ease;
+}
+/* hide the slash when preview is active by fading it out (keeps transitions smooth) */
+.editor-toolbar .tool.preview-btn.active::after,
+.editor-toolbar .tool.preview-btn[aria-pressed="true"]::after{
+	opacity: 0;
+	transform: translate(-50%, -50%) rotate(-45deg) scaleX(0.6);
+}
+
+/* Also hide the slash when the editor container is in preview-active state (more reliable) */
+.preview-active .editor-toolbar .tool.preview-btn::after{
+	opacity: 0 !important;
+	transform: translate(-50%, -50%) rotate(-45deg) scaleX(0.6) !important;
+}
+
+/* ensure active preview button stays on top and its SVG stroke uses the button color */
+.editor-toolbar .tool.preview-btn{z-index:2}
+.editor-toolbar .tool.preview-btn svg{stroke:currentColor;fill:none}
+.editor-toolbar .tool.preview-btn.active{z-index:3}
+
+/* Fallback: hide slash when the button itself has preview-active-btn */
+.editor-toolbar .tool.preview-btn.preview-active-btn::after{
+	opacity: 0 !important;
+	transform: translate(-50%, -50%) rotate(-45deg) scaleX(0.6) !important;
+}
+
+/* 微交互：悬停时让斜线更明显 */
+.editor-toolbar .tool.preview-btn:hover::after{
+	opacity: 1;
+	transform: translate(-50%, -50%) rotate(-45deg) scaleX(1);
+}
+
+/* make image button more compact and recognizable */
+.editor-toolbar .tool[data-action="image"] svg{display:block}
+
+.editor-area{position:relative;min-height:200px}
+.markdown-editor-container.editor-large .editor-area{min-height:320px}
+
+/* 预览覆盖模式：预览位于上层，覆盖 textarea；当预览显示时禁用 textarea 交互 */
+.preview-layer{position:absolute;top:0;left:0;right:0;bottom:0;padding:10px;border:1px solid var(--border);background:var(--card);border-radius:6px;overflow:auto;color:var(--text);z-index:1;display:none}
+.preview-layer .preview-label{font-size:12px;color:var(--text-secondary);margin-bottom:6px}
+.preview-layer .preview-content{padding:6px;white-space:pre-wrap;word-wrap:break-word}
+.preview-layer.visible{display:block;pointer-events:auto;z-index:3}
+
+/* textarea 固定填满容器（保持尺寸稳定），在预览显示时被禁用交互 */
+.markdown-textarea{position:absolute;top:0;left:0;right:0;bottom:0;padding:10px;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);resize:none!important;outline:none;font-family:inherit;color:var(--text);white-space:pre-wrap;word-wrap:break-word;caret-color:var(--text);box-sizing:border-box;overflow:auto;z-index:2}
+
+/* 使不带特殊类的 textarea（回复等）也能填满其编辑器区域 */
+.editor-area textarea{position:absolute;top:0;left:0;right:0;bottom:0;padding:10px;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);resize:none!important;outline:none;font-family:inherit;color:var(--text);white-space:pre-wrap;word-wrap:break-word;caret-color:var(--text);box-sizing:border-box;overflow:auto}
+
+/* 但为本地回复表单保留较小最小高度 */
+.reply-form-local textarea{min-height:80px;padding:8px}
+
+/* 当预览可见且位于 DOM 前（preview-layer 在 textarea 之前）时，禁用 textarea 交互 */
+.preview-layer.visible ~ .markdown-textarea{pointer-events:none;user-select:none}
 .markdown-preview.visible{display:block}
 .reply-form-local textarea{min-height:80px}
 
@@ -21,6 +90,6 @@
 .preview-content h1{font-size:1.4em;margin:0.4em 0}
 .preview-content h2{font-size:1.2em;margin:0.35em 0}
 .preview-content p{margin:0.4em 0}
-.preview-content pre{background:#0f1720;color:#d1d5db;padding:8px;border-radius:6px;overflow:auto}
-.preview-content code{background:#f3f4f6;padding:2px 4px;border-radius:4px}
+.preview-content pre{background:var(--card);color:var(--text);padding:8px;border-radius:6px;overflow:auto;border:1px solid var(--border)}
+.preview-content code{background:var(--input-bg);padding:2px 4px;border-radius:4px;border:1px solid var(--input-border)}
 .preview-content img{max-width:100%;height:auto;border-radius:4px}

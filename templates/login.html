@@ -2,12 +2,15 @@
 <html lang="zh-cn">
 <head>
   {% load static %}
+  {% include '_theme_inline.html' %}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>登录 - 一息博客</title>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}">
 </head>
 <body>
+  <script src="{% static 'netscript/theme.js' %}"></script>
   <div class="container-form">
     <h1>登录</h1>
     <form method="post" action="">

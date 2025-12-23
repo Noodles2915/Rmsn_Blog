@@ -64,17 +64,29 @@
                     if (!action) return;
                     if (action === 'preview-toggle'){
                         if (!preview) return;
-                        var isVisible = preview.classList.contains('visible');
-                        if (isVisible){
-                            preview.classList.remove('visible'); preview.classList.add('hidden');
-                            // show raw markdown text
-                            ta.style.color = '';
-                        } else {
-                            preview.classList.remove('hidden'); preview.classList.add('visible');
-                            // hide raw markdown so rendered HTML shows through
-                            ta.style.color = 'transparent';
-                            render();
-                        }
+                            var isVisible = preview.classList.contains('visible');
+                            if (isVisible){
+                                preview.classList.remove('visible'); preview.classList.add('hidden');
+                                // show raw markdown text
+                                ta.style.color = '';
+                                btn.classList.remove('active');
+                                btn.setAttribute('aria-pressed','false');
+                                // remove container-level preview active state
+                                if (container && container.classList) container.classList.remove('preview-active');
+                                // remove button-level preview active marker
+                                btn.classList.remove('preview-active-btn');
+                            } else {
+                                preview.classList.remove('hidden'); preview.classList.add('visible');
+                                // hide raw markdown so rendered HTML shows through
+                                ta.style.color = 'transparent';
+                                render();
+                                btn.classList.add('active');
+                                btn.setAttribute('aria-pressed','true');
+                                // mark container as preview-active for CSS hooks
+                                if (container && container.classList) container.classList.add('preview-active');
+                                // mark button as preview-active as a fallback
+                                btn.classList.add('preview-active-btn');
+                            }
                         return;
                     }
                     switch(action){
@@ -93,6 +105,21 @@
                 });
                 btn.dataset.bound = '1';
             });
+                // sync preview button state on init
+                var previewToggle = toolbar.querySelector('[data-action="preview-toggle"]');
+                if (previewToggle){
+                    if (preview && preview.classList.contains('visible')){
+                        previewToggle.classList.add('active');
+                        previewToggle.setAttribute('aria-pressed','true');
+                        if (container && container.classList) container.classList.add('preview-active');
+                        previewToggle.classList.add('preview-active-btn');
+                    } else {
+                        previewToggle.classList.remove('active');
+                        previewToggle.setAttribute('aria-pressed','false');
+                        if (container && container.classList) container.classList.remove('preview-active');
+                        previewToggle.classList.remove('preview-active-btn');
+                    }
+                }
         }
     }
 

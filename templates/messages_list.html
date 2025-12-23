@@ -1,13 +1,16 @@
 {% load static %}
 <!doctype html>
-<html lang="zh-cn">
+<html lang="zh-cn" {% if user %}data-theme="{{ user.theme }}"{% endif %}>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>私信 - 一息博客</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
-</head>
-<body>
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+<head>
+    {% include '_theme_inline.html' %}
+    {% load static %}
+    <meta charset="utf-8">
     <header>
         <div class="brand"><h1>一息博客</h1></div>
         <div class="header-actions">

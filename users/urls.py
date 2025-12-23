@@ -14,4 +14,6 @@ urlpatterns = [
     path('profile/edit/', views.profile_edit, name='profile_edit'),
     path('profile/', views.profile, name='profile'),
     path('profile/<str:username>/', views.profile, name='profile_user'),
+    path('api/user/theme/', views.set_theme, name='set_theme'),
+    path('api/theme/', views.get_theme, name='get_theme'),
 ]

@@ -7,6 +7,12 @@ import hashlib
 import uuid
 
 class User(models.Model):
+    THEME_CHOICES = [
+        ('light', '日间模式'),
+        ('dark', '夜间模式'),
+        ('auto', '自动'),
+    ]
+    
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
@@ -15,6 +21,7 @@ class User(models.Model):
     bio = models.CharField(max_length=500, blank=True, default='这个用户很懒，还没有设置个人简介。')
     avatar = models.ImageField(upload_to=avatar_upload_path, null=True, blank=True)
     bg = models.ImageField(upload_to=bg_upload_path, null=True, blank=True)
+    theme = models.CharField(max_length=10, choices=THEME_CHOICES, default='auto')
 
     def __str__(self):
         return self.username

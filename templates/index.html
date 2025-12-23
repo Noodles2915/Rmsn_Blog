@@ -1,11 +1,13 @@
 <!doctype html>
-<html lang="zh-cn">
+<html lang="zh-cn" {% if user %}data-theme="{{ user.theme }}"{% endif %}>
 {% load static %}
 <head>
+    {% include '_theme_inline.html' %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>一息博客</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
 </head>
 <body>
     <header>
@@ -34,6 +36,7 @@
         <div class="nav-shortcut">
                 {% if user %}
                     <div class="user-actions">
+                        <button class="action-btn theme-toggle" data-toggle-theme>☀️ 日间</button>
                         <a href="{% url 'socials:notifications_list' %}" id="notif-link" class="action-btn">
                             <span class="action-icon">🔔</span>
                             <span class="action-text">通知</span>
@@ -90,6 +93,7 @@
     <footer>
         <div>© 2025 一息博客 • Django 出品</div>
     </footer>
+    <script src="{% static 'netscript/theme.js' %}"></script>
     <script>
         (function(){
             var toggle = document.getElementById('user-toggle');

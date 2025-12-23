@@ -1,14 +1,17 @@
 {% load static %}
 <!doctype html>
-<html lang="zh-cn">
+<html lang="zh-cn" {% if user %}data-theme="{{ user.theme }}"{% endif %}>
 <head>
+    {% include '_theme_inline.html' %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>发布新文章 - 一息博客</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
     <link rel="stylesheet" href="{% static 'netscript/editor.css' %}">
 </head>
 <body>
+    <script src="{% static 'netscript/theme.js' %}"></script>
     <header>
         <div class="brand">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -67,7 +70,7 @@
 
                     <div class="form-group markdown-editor-group">
                         <label for="id_content">文章内容 * (Markdown 格式)</label>
-                        <div class="markdown-editor-container">
+                        <div class="markdown-editor-container editor-large">
                             <div class="editor-toolbar" data-target="id_content">
                                 <button type="button" class="tool" data-action="bold">B</button>
                                 <button type="button" class="tool" data-action="italic">I</button>
@@ -77,14 +80,17 @@
                                 <button type="button" class="tool" data-action="ol">1. List</button>
                                 <button type="button" class="tool" data-action="quote">"</button>
                                 <button type="button" class="tool" data-action="code">{} </button>
-                                <button type="button" class="tool" data-action="link">🔗</button>
-                                <button type="button" class="tool" data-action="image">🖼</button>
-                                <button type="button" class="tool" data-action="preview-toggle">预览</button>
+                                <button type="button" class="tool" data-action="link" title="插入链接">🔗</button>
+                                <button type="button" class="tool" data-action="image" title="插入图片" aria-label="插入图片">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15l4-4a2 2 0 0 1 3 0l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="14.5" cy="8.5" r="1.5" fill="currentColor"/></svg>
+                                </button>
+                                <button type="button" class="tool preview-btn" data-action="preview-toggle" aria-pressed="false" title="切换预览" aria-label="切换预览">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </button>
                             </div>
                             <div class="editor-area">
                                 <textarea id="id_content" name="content" placeholder="在此输入文章内容，支持 Markdown 格式..." class="markdown-textarea"></textarea>
                                 <div id="markdown-preview" class="markdown-preview preview-layer hidden">
-                                    <div class="preview-label">预览</div>
                                     <div id="preview-content" class="preview-content"></div>
                                 </div>
                             </div>

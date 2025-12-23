@@ -85,12 +85,13 @@ class LoginForm(Form):
 class ProfileEditForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['email', 'avatar', 'bg', 'bio']
+        fields = ['email', 'avatar', 'bg', 'bio', 'theme']
         labels = {
             'email': '邮箱',
             'avatar': '头像',
             'bg': '背景图片',
             'bio': '个人简介',
+            'theme': '显示主题',
         }
         widgets = {
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
@@ -99,6 +100,7 @@ class ProfileEditForm(forms.ModelForm):
                 'rows': 4,
                 'placeholder': '输入个人简介，最多 500 个字符',
             }),
+            'theme': forms.Select(attrs={'class': 'form-control'}),
         }
 
     def clean_avatar(self):

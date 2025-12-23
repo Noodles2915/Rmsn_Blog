@@ -1,15 +1,18 @@
 {% load static %}
 <!doctype html>
-<html lang="zh-cn">
+<html lang="zh-cn" {% if user %}data-theme="{{ user.theme }}"{% endif %}>
 <head>
+    {% include '_theme_inline.html' %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ post.title }}</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
     <link rel="stylesheet" href="{% static 'netscript/editor.css' %}">
     <link rel="stylesheet" href="{% static 'netscript/waifu.css' %}">
 </head>
 <body>
+    <script src="{% static 'netscript/theme.js' %}"></script>
     <header>
         <div class="brand">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -232,14 +235,17 @@ document.addEventListener('DOMContentLoaded', function(){
                                 <button type="button" class="tool" data-action="ol">1. List</button>
                                 <button type="button" class="tool" data-action="quote">"</button>
                                 <button type="button" class="tool" data-action="code">{} </button>
-                                <button type="button" class="tool" data-action="link">🔗</button>
-                                <button type="button" class="tool" data-action="image">🖼</button>
-                                <button type="button" class="tool" data-action="preview-toggle">预览</button>
+                                <button type="button" class="tool" data-action="link" title="插入链接">🔗</button>
+                                <button type="button" class="tool" data-action="image" title="插入图片" aria-label="插入图片">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15l4-4a2 2 0 0 1 3 0l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="14.5" cy="8.5" r="1.5" fill="currentColor"/></svg>
+                                </button>
+                                <button type="button" class="tool preview-btn" data-action="preview-toggle" aria-pressed="false" title="切换预览" aria-label="切换预览">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </button>
                             </div>
                             <div class="editor-area">
                                 <textarea id="comment-content" name="content" rows="6" placeholder="在此输入评论，支持 Markdown 格式..."></textarea>
                                 <div id="comment-markdown-preview" class="markdown-preview preview-layer hidden">
-                                    <div class="preview-label">预览</div>
                                     <div id="comment-preview-content" class="preview-content"></div>
                                 </div>
                             </div>
@@ -532,12 +538,17 @@ document.addEventListener('DOMContentLoaded', function(){
                 html.push('<button type="button" class="tool" data-action="quote">"</button>');
                 html.push('<button type="button" class="tool" data-action="code">{} </button>');
                 html.push('<button type="button" class="tool" data-action="link">🔗</button>');
-                html.push('<button type="button" class="tool" data-action="preview-toggle">预览</button>');
+                html.push('<button type="button" class="tool preview-btn" data-action="preview-toggle" aria-pressed="false" title="切换预览" aria-label="切换预览">' +
+                          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                          '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+                          '<circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+                          '</svg>' +
+                '');
                 html.push('</div>');
                 html.push('<div class="editor-area">');
                 var placeholder = authorName ? '回复 @' + authorName + '...' : '在此输入回复，支持 Markdown...';
                 html.push('<textarea id="reply-ta-' + parentId + '" name="content" rows="3" placeholder="' + placeholder + '"></textarea>');
-                html.push('<div id="reply-preview-' + parentId + '" class="markdown-preview preview-layer hidden"><div class="preview-label">预览</div><div class="preview-content" id="reply-preview-content-' + parentId + '"></div></div>');
+                html.push('<div id="reply-preview-' + parentId + '" class="markdown-preview preview-layer hidden"><div class="preview-content" id="reply-preview-content-' + parentId + '"></div></div>');
                 html.push('</div>');
                 html.push('<div class="form-actions"><button class="btn btn-primary" type="submit">提交回复</button> <button type="button" class="btn-cancel-reply btn btn-secondary" data-comment-id="' + parentId + '">取消</button></div>');
                 html.push('</form>');
@@ -556,6 +567,8 @@ document.addEventListener('DOMContentLoaded', function(){
                         if (!container) return;
                         if (container.innerHTML.trim() === ''){
                             container.innerHTML = createReplyForm(cid, author);
+                            // Initialize editor for the newly inserted form
+                            if (window.__rmsn_editor_init) window.__rmsn_editor_init(container);
                             // 绑定本地表单提交
                             var f = container.querySelector('form');
                             if (f) bindLocalReplyForm(f);

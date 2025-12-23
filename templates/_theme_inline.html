@@ -1,0 +1,17 @@
+<script>
+(function(){
+    try{
+        var KEY = 'user-theme-preference';
+        var pref = null;
+        try { pref = localStorage.getItem(KEY); } catch(e) { pref = null; }
+        if(!pref){
+            var m = document.cookie.match('(^|;)\s*'+KEY+'\s*=\s*([^;]+)');
+            if(m) pref = decodeURIComponent(m.pop());
+        }
+        if(pref && ['light','dark','auto'].indexOf(pref) !== -1){
+            var actual = pref === 'auto' ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : pref;
+            document.documentElement.setAttribute('data-theme', actual);
+        }
+    }catch(e){}
+})();
+</script>

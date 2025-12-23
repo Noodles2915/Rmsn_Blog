@@ -319,3 +319,41 @@ def send_verification_code(request):
         return JsonResponse({'ok': True})
     except Exception as e:
         return JsonResponse({'ok': False, 'error': str(e)}, status=500)
+
+
+@require_POST
+def set_theme(request):
+    """设置用户主题偏好"""
+    user = get_current_user(request)
+    if not user:
+        return JsonResponse({'ok': False, 'error': '未登录'}, status=401)
+    
+    try:
+        import json
+        data = json.loads(request.body)
+        theme = data.get('theme', 'auto')
+        
+        # 验证主题值
+        valid_themes = ['light', 'dark', 'auto']
+        if theme not in valid_themes:
+            return JsonResponse({'ok': False, 'error': '无效的主题值'}, status=400)
+        
+        # 更新用户主题偏好
+        user.theme = theme
+        user.save()
+        
+        return JsonResponse({'ok': True, 'theme': theme})
+    except json.JSONDecodeError:
+        return JsonResponse({'ok': False, 'error': '无效的 JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'ok': False, 'error': str(e)}, status=500)
+
+
+def get_theme(request):
+    """获取用户主题偏好"""
+    user = get_current_user(request)
+    if not user:
+        # 未登录用户返回自动模式
+        return JsonResponse({'theme': 'auto'})
+    
+    return JsonResponse({'theme': user.theme})

@@ -1,13 +1,16 @@
 <!doctype html>
-<html lang="zh-cn">
+<html lang="zh-cn" {% if user %}data-theme="{{ user.theme }}"{% endif %}>
 <head>
+    {% include '_theme_inline.html' %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>个人信息 - 一息博客</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
 </head>
 <body class="profile-bg-container" style="background: {{ user.bg_css|safe }};">
+    <script src="{% static 'netscript/theme.js' %}"></script>
     <header>
         <div class="brand">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -68,7 +71,7 @@
                             {% if is_own_profile %}
                                 <a href="{% url 'users:profile_edit' %}" class="btn btn-primary">编辑信息</a>
                             {% else %}
-                                <button type="button" id="follow-btn" class="btn follow-btn {% if is_following %}following{% else %}follow{% endif %}" aria-pressed="{{ is_following|yesno:'true,false' }}" data-username="{{ user.username }}"{% if not is_following %} style="background-color: var(--accent); color: #fff;"{% endif %}><span class="icon">+</span> <span class="label">{{ is_following|yesno:"已关注,关注" }}</span></button>
+                                <button type="button" id="follow-btn" class="btn follow-btn {% if is_following %}following{% else %}follow{% endif %}" aria-pressed="{{ is_following|yesno:'true,false' }}" data-username="{{ user.username }}"><span class="icon">+</span> <span class="label">{{ is_following|yesno:"已关注,关注" }}</span></button>
                                 <a href="{% url 'socials:messages_list' %}?with={{ user.username }}" class="btn btn-secondary">💬 发私信</a>
                             {% endif %}
                             <a href="{% url 'users:dashboard' %}" class="btn btn-secondary">返回</a>

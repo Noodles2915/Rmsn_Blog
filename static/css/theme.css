@@ -1,0 +1,320 @@
+/* 主题变量增强和深色模式适配 */
+
+/* 全局字体设定：优先使用微软雅黑 */
+html, body {
+    font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+}
+
+/* 强制全站使用微软雅黑（覆盖其他局部 font-family，包括 code/monospace） */
+*,
+*::before,
+*::after {
+    font-family: "Microsoft YaHei", "微软雅黑", "Microsoft YaHei UI", Arial, sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 保证输入框、代码块也使用微软雅黑 */
+code, pre, textarea, input, select, button {
+    font-family: "Microsoft YaHei", "微软雅黑", "Microsoft YaHei UI", Arial, sans-serif !important;
+}
+
+/* Header */
+header {
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 1px 3px var(--shadow);
+}
+
+/* 徽章 */
+.icon-link .badge {
+    background: var(--error);
+    color: var(--error-contrast);
+}
+
+/* 用户菜单 */
+.user-menu {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 6px 12px var(--shadow);
+}
+
+.user-menu-item:hover {
+    background: var(--hover-bg);
+}
+
+/* 按钮样式 */
+.btn {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    background: var(--hover-bg);
+    border-color: var(--accent);
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: var(--error-contrast);
+    border: 1px solid var(--accent);
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.btn-secondary {
+    background: var(--hover-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent);
+}
+
+.btn-danger {
+    background: var(--error);
+    color: var(--error-contrast);
+    border: 1px solid var(--error);
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+}
+
+.btn.liked {
+    background: var(--error);
+    color: var(--error-contrast);
+    box-shadow: 0 6px 18px rgba(239, 68, 68, 0.12);
+}
+
+.btn.liked .like-icon {
+    color: var(--error-contrast) !important;
+}
+
+.btn[aria-pressed="true"] {
+    background: var(--hover-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn.follow {
+    background: var(--accent);
+    color: var(--on-accent);
+    border: 1px solid var(--accent);
+}
+
+/* 卡片 */
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px var(--shadow);
+}
+
+.card:hover {
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.card h3 a {
+    color: var(--text);
+}
+
+/* 表单输入 */
+.form-input,
+.search-input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+    background: var(--input-bg);
+    color: var(--text);
+    border: 1px solid var(--input-border);
+}
+
+.form-input:focus,
+.search-input:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.form-input-readonly {
+    background: var(--hover-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+/* 链接 */
+a {
+    color: var(--accent);
+}
+
+a:hover {
+    color: var(--accent-hover);
+}
+
+/* 错误消息 */
+.error-list {
+    color: var(--error);
+    background: rgba(239, 68, 68, 0.08);
+    border-left: 3px solid var(--error);
+}
+
+.error-message,
+.error {
+    color: var(--error);
+}
+
+/* 成功消息 */
+.success-message,
+.success {
+    color: var(--success);
+}
+
+/* 标题和文本 */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text);
+}
+
+p {
+    color: var(--text);
+}
+
+.text-muted {
+    color: var(--text-secondary);
+}
+
+.help-text {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+/* 分割线 */
+hr {
+    border: none;
+    border-top: 1px solid var(--border);
+}
+
+/* 代码块 */
+code, pre {
+    background: var(--hover-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+/* 评论 */
+.comment {
+    background: var(--card);
+    border: 1px solid var(--border);
+}
+
+.comment-author {
+    color: var(--text);
+}
+
+.comment-time {
+    color: var(--text-secondary);
+}
+
+/* 标签 */
+.tag {
+    background: var(--hover-bg);
+    color: var(--accent);
+    border: 1px solid var(--border);
+}
+
+.tag:hover {
+    background: var(--accent);
+    color: var(--error-contrast);
+    border-color: var(--accent);
+}
+
+/* 输入框占位符 */
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-secondary);
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+}
+
+/* 模态框 */
+.modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 25px -5px var(--shadow);
+}
+
+.modal-backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* 表格 */
+table {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+table thead {
+    background: var(--hover-bg);
+}
+
+table td, table th {
+    border-bottom: 1px solid var(--border);
+}
+
+/* 主题切换按钮样式 */
+.theme-toggle {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.theme-toggle:hover {
+    background: var(--hover-bg);
+    border-color: var(--accent);
+}
+
+/* 动画和过渡 */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* 禁用过渡以避免闪烁 */
+input,
+textarea,
+select {
+    transition: none;
+}
