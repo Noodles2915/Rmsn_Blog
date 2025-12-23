@@ -54,6 +54,8 @@ header {
 .btn:hover {
     background: var(--hover-bg);
     border-color: var(--accent);
+    /* 明确设置悬停时文字颜色，避免浅色背景与浅色文字造成不可读 */
+    color: var(--text);
 }
 
 .btn-primary {
@@ -65,6 +67,31 @@ header {
 .btn-primary:hover {
     background: var(--accent-hover);
     border-color: var(--accent-hover);
+    color: var(--on-accent) !important;
+}
+
+/* Ensure buttons placed on strong/accented backgrounds remain readable */
+.card-header .btn,
+.content-header .btn,
+.header .action-btn.theme-toggle,
+.nav-shortcut .action-btn.theme-toggle,
+.user-menu .action-btn {
+    color: var(--on-accent) !important;
+}
+
+/* Fix: labels used as buttons inside forms were being overridden by .form-group label */
+/* Ensure label elements that act as buttons get button color semantics */
+.form-group label.btn-primary,
+.form-group label.btn.btn-primary {
+    color: var(--on-accent) !important;
+}
+.form-group label.btn-secondary,
+.form-group label.btn.btn-secondary {
+    color: var(--text) !important;
+}
+.form-group label.btn-danger,
+.form-group label.btn.btn-danger {
+    color: var(--error-contrast) !important;
 }
 
 .btn-secondary {
@@ -75,6 +102,7 @@ header {
 
 .btn-secondary:hover {
     border-color: var(--accent);
+    color: var(--text);
 }
 
 .btn-danger {
@@ -103,6 +131,8 @@ header {
     color: var(--text);
     border: 1px solid var(--border);
 }
+/* 当已按下/切换态悬停时，确保文字仍然可见 */
+.btn[aria-pressed="true"]:hover { color: var(--text); }
 
 .btn.follow {
     background: var(--accent);

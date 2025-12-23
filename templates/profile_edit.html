@@ -116,18 +116,7 @@
                 </div>
             </div>
 
-            <div class="form-section">
-                <div class="form-section-title">主题偏好</div>
-                <div class="form-group">
-                    <label for="id_theme">显示主题</label>
-                    <select id="id_theme" name="theme" class="form-input">
-                        <option value="auto" {% if user.theme == 'auto' %}selected{% endif %}>自动（跟随系统）</option>
-                        <option value="light" {% if user.theme == 'light' %}selected{% endif %}>日间模式</option>
-                        <option value="dark" {% if user.theme == 'dark' %}selected{% endif %}>夜间模式</option>
-                    </select>
-                    <div class="help-text">选择您偏好的显示主题</div>
-                </div>
-            </div>
+            <!-- 主题偏好已移除：改为使用系统/站点默认主题管理 -->
 
             {% if form.bio %}
             <div class="form-section">
@@ -142,6 +131,19 @@
                 </div>
             </div>
             {% endif %}
+
+            <div class="form-section">
+                <div class="form-section-title">显示主题（仅客户端）</div>
+                <div class="form-group">
+                    <div class="help-text">此设置仅保存在您的浏览器，用于切换日/夜/自动三种显示模式。</div>
+                    <div style="display:flex;gap:8px;margin-top:8px;">
+                        <button type="button" class="btn" data-theme-value="light">☀️ 日间</button>
+                        <button type="button" class="btn" data-theme-value="dark">🌙 夜间</button>
+                        <button type="button" class="btn" data-theme-value="auto">🔄 自动</button>
+                        <button type="button" class="btn" id="theme-clear-btn">❌ 清除偏好</button>
+                    </div>
+                </div>
+            </div>
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">保存修改</button>
@@ -264,6 +266,27 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
+
+    // 客户端主题选择（仅更改 localStorage/cookie，不修改服务器侧 user.theme）
+    (function(){
+        function setPref(theme){
+            try { localStorage.setItem('user-theme-preference', theme); } catch(e){}
+            document.cookie = 'user-theme-preference=' + encodeURIComponent(theme) + '; path=/';
+            if (window.themeManager && typeof window.themeManager.setTheme === 'function') {
+                window.themeManager.setTheme(theme);
+            } else {
+                // 回退：立即设置 data-theme 并刷新页面
+                var actual = theme === 'auto' ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme;
+                document.documentElement.setAttribute('data-theme', actual);
+            }
+        }
+
+        document.querySelectorAll('[data-theme-value]').forEach(function(btn){
+            btn.addEventListener('click', function(){ setPref(btn.getAttribute('data-theme-value')); });
+        });
+        var clearBtn = document.getElementById('theme-clear-btn');
+        if (clearBtn) clearBtn.addEventListener('click', function(){ try{ localStorage.removeItem('user-theme-preference'); document.cookie='user-theme-preference=;max-age=0;path=/'; }catch(e){}; location.reload(); });
+    })();
 
     // 头像裁剪逻辑
     var cropper = null;

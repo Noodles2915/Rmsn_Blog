@@ -27,8 +27,45 @@ class ThemeManager {
 
         // 立即应用主题（同步），以减少加载时的闪烁
         this.applyThemeImmediately(preferredTheme);
+        // Ensure there is at least one client-side toggle control available
+        this.ensureTogglePresent();
         this.setupListeners();
         this.setupMediaQueryListener();
+    }
+
+    /**
+     * 如果页面上没有任何 [data-toggle-theme] 按钮，则动态创建并插入到 header（优先放到 .user-actions）
+     */
+    ensureTogglePresent() {
+        try {
+            if (document.querySelector('[data-toggle-theme]')) return;
+            // 优先插入到用户操作区；增加更多候选容器以兼容不同模板布局
+            const candidates = [
+                '.nav-shortcut .user-actions',
+                '.nav-shortcut',
+                '.header-right',
+                '.user-dropdown',
+                '.user-toggle',
+                'header'
+            ];
+            let target = null;
+            for (let sel of candidates) {
+                const el = document.querySelector(sel);
+                if (el) { target = el; break; }
+            }
+            
+            if (!target) return;
+
+            const btn = document.createElement('button');
+            btn.className = 'action-btn theme-toggle';
+            btn.setAttribute('data-toggle-theme', '');
+            // 初始文本将在 updateButtonStates 中被覆盖
+            btn.textContent = '🔄 主题';
+            btn.id = 'theme-toggle-btn';
+            // 插入到最前面
+            if (target.firstChild) target.insertBefore(btn, target.firstChild);
+            else target.appendChild(btn);
+        } catch (e) {}
     }
 
     /**
@@ -142,7 +179,6 @@ class ThemeManager {
                 e.preventDefault();
                 this.toggleTheme();
                 this.updateButtonStates();
-                this.syncWithServer();
             });
         });
 

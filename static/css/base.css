@@ -718,6 +718,29 @@ footer > div {
 .user-card .edit-profile-btn:hover {
     background: var(--accent-hover);
 }
+/* 毛玻璃（Frosted glass）：为 profile 页面卡片添加半透明模糊效果 */
+.profile-bg-container .container > .card,
+.profile-bg-container .container > .card .card-body,
+.profile-bg-container .container > .card .card-header,
+.profile-bg-container .container > .user-card {
+    background: rgba(255,255,255,0.36);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 6px 20px rgba(2,6,23,0.22);
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+}
+
+/* 深色主题下的毛玻璃样式调整 */
+[data-theme="dark"] .profile-bg-container .container > .card,
+[data-theme="dark"] .profile-bg-container .container > .card .card-body,
+[data-theme="dark"] .profile-bg-container .container > .card .card-header,
+[data-theme="dark"] .profile-bg-container .container > .user-card {
+    background: rgba(18,24,36,0.36);
+    border: 1px solid rgba(255,255,255,0.02);
+    box-shadow: 0 6px 20px rgba(2,6,23,0.48);
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+}
 .quick-actions {
     background: var(--card);
     border: 1px solid var(--border);
@@ -1402,11 +1425,6 @@ input[type=text], input[type=email], input[type=password] { padding: 10px; borde
 }
 
 /* Profile 页面卡片增强样式 */
-.profile-bg-container .container > .card {
-    background: var(--card) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important;
-}
 
 .card-header {
     background: linear-gradient(135deg, var(--accent) 0%, #1e4f7a 100%);
