@@ -6,12 +6,36 @@ from .models import Post, Tag, Comment, PostLike
 from .forms import PostForm, CommentForm, ALLOWED_TAGS, ALLOWED_ATTRIBUTES
 from markdownx.utils import markdownify
 import bleach
+import re
+import html as pyhtml
+from pygments import highlight
+from pygments.lexers import get_lexer_by_name, guess_lexer
+from pygments.formatters import HtmlFormatter
+from pygments.util import ClassNotFound
 import json
 from django.utils.html import strip_tags
 from django.utils.text import Truncator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
+
+
+def highlight_code_blocks(html_input):
+    fmt = HtmlFormatter(cssclass='codehilite')
+    pattern = re.compile(r'<pre><code(?: class="language-([^"]+)")?>(.*?)</code></pre>', re.DOTALL)
+    def _repl(m):
+        lang = m.group(1)
+        code = pyhtml.unescape(m.group(2) or '')
+        try:
+            if lang:
+                lexer = get_lexer_by_name(lang, stripall=True)
+            else:
+                lexer = guess_lexer(code)
+        except ClassNotFound:
+            from pygments.lexers.special import TextLexer
+            lexer = TextLexer()
+        return highlight(code, lexer, fmt)
+    return pattern.sub(_repl, html_input)
 
 
 def new_post(request):
@@ -37,7 +61,9 @@ def new_post(request):
             post.content_raw = raw_md
             # 将 Markdown 渲染为 HTML 并清理 XSS
             html = markdownify(raw_md)
-            cleaned = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+            # Server-side syntax highlighting (applies module-level helper)
+            highlighted = highlight_code_blocks(html)
+            cleaned = bleach.clean(highlighted, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
             post.content = cleaned
             post.author = user
             post.save()
@@ -92,7 +118,9 @@ def edit_post(request, post_id):
             post.content_raw = raw_md
             # 将 Markdown 渲染为 HTML 并清理 XSS
             html = markdownify(raw_md)
-            cleaned = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+            # 高亮后清理
+            highlighted = highlight_code_blocks(html)
+            cleaned = bleach.clean(highlighted, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
             post.content = cleaned
             post.save()
             # 更新标签
@@ -203,7 +231,8 @@ def add_comment(request, post_id):
 
     raw_md = form.cleaned_data['content']
     html = markdownify(raw_md)
-    cleaned = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+    highlighted = highlight_code_blocks(html)
+    cleaned = bleach.clean(highlighted, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
 
     comment = Comment.objects.create(
         post=post,
@@ -462,7 +491,8 @@ def api_add_comment_api(request, post_id):
         return JsonResponse({'ok': False, 'error': 'authentication required'}, status=401)
 
     html = markdownify(raw_md)
-    cleaned = bleach.clean(html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
+    highlighted = highlight_code_blocks(html)
+    cleaned = bleach.clean(highlighted, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
 
     comment = Comment.objects.create(
         post=post,

@@ -6,17 +6,29 @@ html, body {
 }
 
 /* 强制全站使用微软雅黑（覆盖其他局部 font-family，包括 code/monospace） */
-*,
+,
 *::before,
 *::after {
-    font-family: "Microsoft YaHei", "微软雅黑", "Microsoft YaHei UI", Arial, sans-serif !important;
+    font-family: "Microsoft YaHei", "微软雅黑", "Microsoft YaHei UI", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* 保证输入框、代码块也使用微软雅黑 */
-code, pre, textarea, input, select, button {
-    font-family: "Microsoft YaHei", "微软雅黑", "Microsoft YaHei UI", Arial, sans-serif !important;
+/* 表单控件使用界面无衬线字体以保持一致性 */
+input,
+textarea,
+select,
+button {
+    font-family: "Microsoft YaHei", "微软雅黑", "Microsoft YaHei UI", Arial, sans-serif;
+}
+
+/* 代码块使用等宽字体，确保 Markdown 代码块正常显示并保留空白 */
+code,
+pre,
+kbd,
+samp {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Helvetica Neue", monospace !important;
+    white-space: pre;
 }
 
 /* Header */
@@ -77,6 +89,12 @@ header {
 .nav-shortcut .action-btn.theme-toggle,
 .user-menu .action-btn {
     color: var(--on-accent) !important;
+}
+
+/* Fix: in light/day theme the theme-toggle in header should use regular text color */
+body:not([data-theme="dark"]) .header .action-btn.theme-toggle,
+body:not([data-theme="dark"]) .nav-shortcut .action-btn.theme-toggle {
+    color: var(--text) !important;
 }
 
 /* Fix: labels used as buttons inside forms were being overridden by .form-group label */
@@ -194,6 +212,42 @@ a:hover {
     color: var(--accent-hover);
 }
 
+/* 不在按钮、卡片或下拉菜单中显示蓝色下划线：移除文本装饰并处理聚焦样式 */
+.btn a,
+.card a,
+.user-menu a,
+.nav-shortcut a,
+.action-btn a,
+.dropdown-menu a,
+.dropdown-item a {
+    text-decoration: none;
+}
+
+/* 确保在聚焦/激活时不出现默认蓝色下划线或装饰，但保留 focus-visible 可见性 */
+.btn a:focus,
+.card a:focus,
+.user-menu a:focus,
+.nav-shortcut a:focus,
+.action-btn a:focus,
+.dropdown-menu a:focus,
+.dropdown-item a:focus,
+.btn:focus,
+.card:focus,
+.dropdown-item:focus {
+    text-decoration: none;
+    outline: none;
+    box-shadow: none;
+}
+
+/* 可访问的自定义聚焦环（当用户使用键盘时显示） */
+.btn:focus-visible,
+.card:focus-visible,
+.dropdown-item:focus-visible,
+.action-btn:focus-visible {
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.18);
+    outline: none;
+}
+
 /* 错误消息 */
 .error-list {
     color: var(--error);
@@ -237,10 +291,38 @@ hr {
 }
 
 /* 代码块 */
-code, pre {
+code {
+    background: transparent;
+    color: var(--text);
+}
+
+pre,
+pre code {
     background: var(--hover-bg);
     color: var(--text);
     border: 1px solid var(--border);
+    padding: 12px;
+    border-radius: 8px;
+    overflow: auto;
+    white-space: pre;
+}
+
+/* Pygments output wrapper (server-side highlighted) */
+.codehilite {
+    background: var(--hover-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 12px;
+    border-radius: 8px;
+    overflow: auto;
+}
+.codehilite pre { background: transparent; margin: 0; padding: 0; }
+.codehilite .highlight { background: transparent; }
+
+/* Dark theme adjustments for highlighted code */
+[data-theme="dark"] .codehilite {
+    background: rgba(255,255,255,0.02);
+    border-color: rgba(255,255,255,0.04);
 }
 
 /* 评论 */
@@ -347,4 +429,112 @@ input,
 textarea,
 select {
     transition: none;
+}
+
+/* Toast UI (moved from template) */
+#toast-container { position: fixed; right: 16px; bottom: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { pointer-events: auto; min-width: 200px; max-width: 360px; padding: 10px 14px; border-radius: 8px; color: #fff; box-shadow: 0 6px 18px rgba(2,6,23,0.24); opacity: 0; transform: translateY(12px) scale(0.98); font-weight: 600; }
+
+@keyframes toast-in {
+    0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toast-out {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(12px) scale(0.98); }
+}
+.toast.enter { animation: toast-in 280ms cubic-bezier(.2,.9,.3,1) forwards; }
+.toast.leave { animation: toast-out 220ms ease forwards; }
+.toast.info { background: linear-gradient(90deg,#111827,#1f2937); }
+.toast.success { background: linear-gradient(90deg,#059669,#10b981); }
+.toast.error { background: linear-gradient(90deg,#dc2626,#ef4444); }
+
+
+/* Auth pages: full-screen custom background with frosted glass card */
+.auth-bg {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    z-index: 0;
+    /* --auth-bg-image can be set inline on the element to customize background */
+}
+.auth-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: var(--auth-bg-image, linear-gradient(135deg, rgba(59,130,246,0.08), rgba(99,102,241,0.06)));
+    background-size: cover;
+    background-position: center;
+    filter: saturate(110%) contrast(95%);
+}
+.auth-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.06));
+    mix-blend-mode: overlay;
+    pointer-events: none;
+}
+
+.glass-card {
+    width: 100%;
+    max-width: 520px;
+    border-radius: 14px;
+    padding: 28px 28px;
+    box-shadow: 0 12px 32px rgba(2,6,23,0.18);
+    background: rgba(255,255,255,0.36);
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(12px) saturate(120%);
+    -webkit-backdrop-filter: blur(12px) saturate(120%);
+    z-index: 1;
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .glass-card {
+    background: rgba(18,24,36,0.42);
+    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow: 0 12px 34px rgba(2,6,23,0.48);
+}
+
+.container-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.container-form h1 { font-size: 22px; margin-bottom: 6px; color: var(--text); }
+.container-form label { display: block; margin-bottom: 6px; color: var(--text-secondary); font-weight: 600; }
+.container-form input[type="text"],
+.container-form input[type="email"],
+.container-form input[type="password"],
+.container-form .vcode-input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,0.06);
+    background: rgba(255,255,255,0.6);
+    color: var(--text);
+}
+
+[data-theme="dark"] .container-form input[type="text"],
+[data-theme="dark"] .container-form input[type="email"],
+[data-theme="dark"] .container-form input[type="password"],
+[data-theme="dark"] .container-form .vcode-input {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.04);
+    color: var(--text);
+}
+
+.flex-row { display: flex; gap: 8px; align-items: center; }
+.vcode-input { flex: 1; }
+.container-form .btn { padding: 10px 14px; border-radius: 10px; }
+.container-form .foot { margin-top: 12px; color: var(--text-secondary); font-size: 14px; }
+
+@media (max-width: 520px) {
+    .glass-card { padding: 20px; border-radius: 12px; }
 }

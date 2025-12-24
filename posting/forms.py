@@ -5,7 +5,7 @@ import bleach
 # 允许的 HTML 标签和属性，适用于将 Markdown 渲染为 HTML 后进行清理
 ALLOWED_TAGS = [
     'a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul',
-    'h1', 'h2', 'h3', 'p', 'pre', 'img', 'br'
+    'h1', 'h2', 'h3', 'p', 'pre', 'img', 'br', 'span', 'div', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'hr'
 ]
 ALLOWED_ATTRIBUTES = {
     '*': ['class', 'style'],

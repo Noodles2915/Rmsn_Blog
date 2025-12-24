@@ -46,6 +46,47 @@
         }
 
         ta.addEventListener('input', render);
+        // Tab 支持：在 textarea 中插入制表符而不是切换焦点；支持缩进/反缩进选中多行
+        ta.addEventListener('keydown', function(e){
+            if (e.key === 'Tab'){
+                e.preventDefault();
+                var start = ta.selectionStart, end = ta.selectionEnd;
+                var val = ta.value;
+                // 如果选择多行，则对每一行进行缩进或反缩进
+                var selected = val.slice(start, end);
+                if (selected.indexOf('\n') !== -1){
+                    var linesStart = val.lastIndexOf('\n', start - 1) + 1;
+                    var linesEnd = val.indexOf('\n', end);
+                    if (linesEnd === -1) linesEnd = val.length;
+                    var block = val.slice(linesStart, linesEnd);
+                    if (e.shiftKey){
+                        // 反缩进：移除每行首个制表符或四个空格
+                        var newBlock = block.split('\n').map(function(line){
+                            if (line.startsWith('\t')) return line.slice(1);
+                            if (line.startsWith('    ')) return line.slice(4);
+                            return line.replace(/^\s{0,1}/, '');
+                        }).join('\n');
+                        ta.value = val.slice(0, linesStart) + newBlock + val.slice(linesEnd);
+                        // 重新设置选区覆盖原来行
+                        ta.setSelectionRange(linesStart, linesStart + newBlock.length);
+                    } else {
+                        // 缩进：在每行前加一个制表符
+                        var newBlock = block.split('\n').map(function(line){ return '\t' + line; }).join('\n');
+                        ta.value = val.slice(0, linesStart) + newBlock + val.slice(linesEnd);
+                        ta.setSelectionRange(linesStart, linesStart + newBlock.length);
+                    }
+                } else {
+                    // 单行或无选中：在光标处插入制表符
+                    var before = val.slice(0, start);
+                    var after = val.slice(end);
+                    var newPos = start + 1;
+                    ta.value = before + '\t' + after;
+                    ta.setSelectionRange(newPos, newPos);
+                }
+                triggerInput(ta);
+                render();
+            }
+        });
         // sync scroll position
         ta.addEventListener('scroll', function(){ if (preview) preview.scrollTop = ta.scrollTop; });
         
@@ -97,7 +138,7 @@
                         case 'ul': insertAroundSelection(ta,'- ',''); break;
                         case 'ol': insertAroundSelection(ta,'1. ',''); break;
                         case 'quote': insertAroundSelection(ta,'> ',''); break;
-                        case 'code': insertAroundSelection(ta,'``\n','\n```'); break;
+                        case 'code': insertAroundSelection(ta,'```\n','\n```'); break;
                         case 'link': insertAroundSelection(ta,'[','](http://)'); break;
                         case 'image': insertAroundSelection(ta,'![](','') ; break;
                         default: break;

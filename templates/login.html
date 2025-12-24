@@ -11,9 +11,10 @@
 </head>
 <body>
   <script src="{% static 'netscript/theme.js' %}"></script>
-  <div class="container-form">
-    <h1>登录</h1>
-    <form method="post" action="">
+  <div class="auth-bg" style="--auth-bg-image: url({% static 'default_bg.png' %});">
+    <div class="glass-card container-form">
+      <h1>登录</h1>
+      <form method="post" action="">
       {% csrf_token %}
       {% if next %}
         <input type="hidden" name="next" value="{{ next }}">
@@ -40,9 +41,10 @@
       </div>
 
       <button class="btn" type="submit">登录</button>
-    </form>
+      </form>
 
-    <div class="foot">还没有账号？ <a href="{% url 'users:register' %}">注册一个</a></div>
+      <div class="foot">还没有账号？ <a href="{% url 'users:register' %}">注册一个</a></div>
+    </div>
   </div>
 </body>
 </html>

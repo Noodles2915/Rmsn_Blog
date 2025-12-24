@@ -8,8 +8,10 @@
     <title>{{ post.title }}</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/styles/default.min.css">
     <link rel="stylesheet" href="{% static 'netscript/editor.css' %}">
     <link rel="stylesheet" href="{% static 'netscript/waifu.css' %}">
+    <!-- Toast 样式已移至 static/css/theme.css -->
 </head>
 <body>
     <script src="{% static 'netscript/theme.js' %}"></script>
@@ -84,7 +86,7 @@
                 {% if post.tags.exists %}
                     <div class="post-tags">
                         {% for tag in post.tags.all %}
-                                <a href="{% url 'posting:search_posts' %}?q={{ tag.name }}" class="tag">#{{ tag }}</a>
+                                <a href="{% url 'posting:search_posts' %}?q=%23{{ tag.name }}" class="tag">#{{ tag }}</a>
                         {% endfor %}
                     </div>
                 {% endif %}
@@ -220,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function(){
             <!-- 新评论表单 -->
             {% if user %}
             <div class="card">
-                <form method="post" action="{% url 'posting:add_comment' post.id %}">
+                <form id="new-comment-form" method="post" action="{% url 'posting:add_comment' post.id %}">
                     {% csrf_token %}
                     <input type="hidden" name="parent_id" value="">
                     <div class="form-group markdown-editor-group">
@@ -289,10 +291,55 @@ document.addEventListener('DOMContentLoaded', function(){
     <footer>
         <div>© 2025 一息博客 • Django 出品</div>
     </footer>
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
     <script src="{% static 'netscript/marked.min.js' %}"></script>
     <script src="{% static 'netscript/editor.js' %}"></script>
     <script>
+        // 如果服务器端 content 未正确渲染（仍为原始 Markdown 或缺少 code/pre 标签），
+        // 优先使用客户端 marked 渲染 post.content_raw 作为回退，以确保代码块正确显示。
+        (function(){
+            try{
+                var raw = "{{ post.content_raw|escapejs }}";
+                if (window.marked && raw && raw.trim()){
+                    var pc = document.querySelector('.post-content');
+                    if (pc){
+                        // 如果服务器端已经渲染了 HTML 并包含 <pre> 或 <code>，则不覆盖
+                        var html = pc.innerHTML || '';
+                        if (!(/<pre|<code/.test(html))){
+                            pc.innerHTML = marked.parse(raw);
+                        }
+                    }
+                }
+            }catch(e){/* ignore */}
+        })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/languages/go.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script>
         document.addEventListener('DOMContentLoaded', function(){
+            // Toast helper
+            function showToast(message, level) {
+                level = level || 'info';
+                var container = document.getElementById('toast-container');
+                if (!container) return;
+                var t = document.createElement('div');
+                t.className = 'toast ' + level;
+                t.textContent = message;
+                container.appendChild(t);
+                // enter animation via keyframes
+                requestAnimationFrame(function(){
+                    t.classList.add('enter');
+                });
+                var visibleMs = 3600;
+                setTimeout(function(){
+                    // start leave animation
+                    t.classList.remove('enter');
+                    t.classList.add('leave');
+                    // remove after leave animation duration (match CSS 220ms)
+                    setTimeout(function(){ try{ t.remove(); } catch(e){} }, 260);
+                }, visibleMs);
+            }
             // 用户下拉菜单切换（如果存在）
             (function(){
                 var toggle = document.getElementById('user-toggle');
@@ -587,15 +634,19 @@ document.addEventListener('DOMContentLoaded', function(){
                     var parentId = form.dataset.parentId;
                     var ta = form.querySelector('textarea');
                     var content = ta ? ta.value.trim() : '';
-                    if (!content){ alert('回复内容不能为空'); return; }
+                    if (!content){ showToast('回复内容不能为空', 'error'); return; }
+                    var submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn) { submitBtn.disabled = true; }
                     fetch(apiAddCommentURL, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                         body: JSON.stringify({ content: content, parent_id: parentId })
                     }).then(function(res){ return res.json(); })
                     .then(function(data){
-                        if (!data || !data.ok){ alert(data && data.error ? data.error : '回复失败'); return; }
+                        if (!data || !data.ok){ showToast((data && data.error) ? data.error : '回复失败', 'error'); return; }
+                        showToast('回复发布成功', 'success');
                         fetchAndRenderComments();
-                    }).catch(function(err){ console.error(err); alert('网络错误'); });
+                    }).catch(function(err){ console.error(err); showToast('网络错误', 'error'); })
+                    .finally(function(){ if (submitBtn) { submitBtn.disabled = false; } });
                 });
                 form.dataset.bound = '1';
             }
@@ -622,11 +673,13 @@ document.addEventListener('DOMContentLoaded', function(){
                         e.preventDefault();
                         var cid = this.getAttribute('data-comment-id');
                         if (!confirm('确定要删除此评论吗？此操作不可恢复。')) return;
+                        btn.disabled = true;
                         fetch('/post/comment/' + cid + '/delete/', {
                             method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') }
                         }).then(function(res){ return res.json(); })
-                        .then(function(data){ if (data.ok) fetchAndRenderComments(); else alert(data.error||'删除失败'); })
-                        .catch(function(err){ console.error(err); alert('删除失败'); });
+                        .then(function(data){ if (data.ok) { showToast('删除成功', 'success'); fetchAndRenderComments(); } else { showToast(data.error||'删除失败', 'error'); } })
+                        .catch(function(err){ console.error(err); showToast('删除失败', 'error'); })
+                        .finally(function(){ btn.disabled = false; });
                     });
                     btn.dataset.bound = '1';
                 });
@@ -634,6 +687,37 @@ document.addEventListener('DOMContentLoaded', function(){
 
             // 初始加载
             fetchAndRenderComments();
+            // 拦截主评论表单提交，使用 AJAX 创建评论
+            (function(){
+                var newForm = document.getElementById('new-comment-form');
+                if (!newForm) return;
+                newForm.addEventListener('submit', function(e){
+                    e.preventDefault();
+                    var ta = document.getElementById('comment-content');
+                    var content = ta ? ta.value.trim() : '';
+                    if (!content) { showToast('评论内容不能为空', 'error'); return; }
+                    var csrftoken = getCookie('csrftoken');
+                    var submitBtn = newForm.querySelector('button[type="submit"]');
+                    if (submitBtn) submitBtn.disabled = true;
+                    fetch(apiAddCommentURL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ content: content })
+                    }).then(function(res){ return res.json(); })
+                    .then(function(data){
+                        if (!data || !data.ok){ showToast((data && data.error) ? data.error : '发表评论失败', 'error'); return; }
+                        // 清空文本框并刷新评论列表（简单可靠）
+                        if (ta) ta.value = '';
+                        fetchAndRenderComments();
+                        showToast('评论发布成功', 'success');
+                    }).catch(function(err){ console.error(err); showToast('网络错误', 'error'); })
+                    .finally(function(){ if (submitBtn) submitBtn.disabled = false; });
+                });
+            })();
             // 绑定删除按钮（可能在 noscript 回退时使用）
             bindDeleteButtons(document);
             // -----------------------------------------

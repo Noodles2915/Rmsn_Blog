@@ -8,10 +8,12 @@
   <title>注册 - 一息博客</title>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+  
 </head>
 <body>
   <script src="{% static 'netscript/theme.js' %}"></script>
-  <div class="container-form">
+  <div class="auth-bg" style="--auth-bg-image: url({% static 'default_bg.png' %});">
+    <div class="glass-card container-form">
     <h1>注册</h1>
     <form method="post" action="" class="form-column">
       {% csrf_token %}
@@ -69,7 +71,6 @@
 
       <button class="btn" type="submit">注册并登录</button>
     </form>
-
     <script>
       // 获取 CSRF token（从 cookie）
       function getCookie(name) {
@@ -186,6 +187,7 @@
       document.addEventListener('DOMContentLoaded', function () { restoreCooldownIfAny(); });
     </script>
     <div class="foot">已有账号？ <a href="{% url 'users:login' %}">去登录</a></div>
+    </div>
   </div>
 </body>
 </html>
