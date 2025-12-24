@@ -1,0 +1,207 @@
+/*!
+  Theme: Default (Enhanced for day/night theme support)
+  Description: Original highlight.js style with theme-aware colors
+  Author: (c) Ivan Sagalaev <maniac@softwaremaniacs.org>
+  Maintainer: @highlightjs/core-team
+  Website: https://highlightjs.org/
+  License: see project LICENSE
+  Touched: 2021
+  Enhanced: 2025 for RmsnBlog theme switching
+*/
+
+:root {
+  /* Light theme (default) */
+  --hljs-bg: #f3f3f3;
+  --hljs-text: #444;
+  --hljs-comment: #697070;
+  --hljs-punctuation: #444a;
+  --hljs-keyword: #800;
+  --hljs-string: #800;
+  --hljs-number: #800;
+  --hljs-literal: #695;
+  --hljs-builtin: #397300;
+  --hljs-operator: #ab5656;
+  --hljs-meta: #1f7199;
+  --hljs-meta-string: #38a;
+}
+
+[data-theme="dark"] {
+  /* Dark theme overrides */
+  --hljs-bg: #1e293b;
+  --hljs-text: #e2e8f0;
+  --hljs-comment: #8b96a8;
+  --hljs-punctuation: #a0aec0;
+  --hljs-keyword: #ff86a3;
+  --hljs-string: #94d7a2;
+  --hljs-number: #d19a66;
+  --hljs-literal: #7dd3fc;
+  --hljs-builtin: #86efac;
+  --hljs-operator: #f97316;
+  --hljs-meta: #60a5fa;
+  --hljs-meta-string: #22d3ee;
+}
+
+/* Support both highlight.js (.hljs) and Pygments (.codehilite/.highlight) */
+pre code.hljs,
+.codehilite pre,
+.highlight pre {
+  display:block;
+  overflow-x:auto;
+  padding:1em
+}
+
+code.hljs {
+  padding:3px 5px
+}
+
+.hljs,
+.codehilite,
+.highlight {
+  background:var(--hljs-bg);
+  color:var(--hljs-text)
+}
+
+.hljs-comment,
+.codehilite .c,
+.codehilite .cm,
+.codehilite .cp,
+.codehilite .c1,
+.codehilite .cs,
+.highlight .c,
+.highlight .cm,
+.highlight .cp,
+.highlight .c1,
+.highlight .cs {
+  color:var(--hljs-comment)
+}
+
+.hljs-punctuation,
+.hljs-tag,
+.codehilite .p,
+.codehilite .o,
+.highlight .p,
+.highlight .o {
+  color:var(--hljs-punctuation)
+}
+
+.hljs-tag .hljs-attr,
+.hljs-tag .hljs-name {
+  color:var(--hljs-punctuation)
+}
+
+.hljs-attribute,
+.hljs-doctag,
+.hljs-keyword,
+.hljs-meta .hljs-keyword,
+.hljs-name,
+.hljs-selector-tag,
+.codehilite .k,
+.codehilite .kc,
+.codehilite .kd,
+.codehilite .kn,
+.codehilite .kp,
+.codehilite .kr,
+.codehilite .kt,
+.highlight .k,
+.highlight .kc,
+.highlight .kd,
+.highlight .kn,
+.highlight .kp,
+.highlight .kr,
+.highlight .kt {
+  font-weight:700;
+  color:var(--hljs-keyword)
+}
+
+.hljs-deletion,
+.hljs-number,
+.hljs-quote,
+.hljs-selector-class,
+.hljs-selector-id,
+.hljs-string,
+.hljs-template-tag,
+.hljs-type,
+.codehilite .s,
+.codehilite .sb,
+.codehilite .sc,
+.codehilite .sd,
+.codehilite .s2,
+.codehilite .se,
+.codehilite .sh,
+.codehilite .si,
+.codehilite .sx,
+.codehilite .sr,
+.codehilite .s1,
+.codehilite .ss,
+.highlight .s,
+.highlight .sb,
+.highlight .sc,
+.highlight .sd,
+.highlight .s2,
+.highlight .se,
+.highlight .sh,
+.highlight .si,
+.highlight .sx,
+.highlight .sr,
+.highlight .s1,
+.highlight .ss {
+  color:var(--hljs-string)
+}
+
+.hljs-section,
+.hljs-title {
+  color:var(--hljs-keyword);
+  font-weight:700
+}
+
+.hljs-link,
+.hljs-operator,
+.hljs-regexp,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-symbol,
+.hljs-template-variable,
+.hljs-variable {
+  color:var(--hljs-operator)
+}
+
+.hljs-literal {
+  color:var(--hljs-literal)
+}
+
+.hljs-addition,
+.hljs-built_in,
+.hljs-bullet,
+.hljs-code,
+.codehilite .n,
+.codehilite .na,
+.codehilite .nb,
+.codehilite .nc,
+.codehilite .nn,
+.codehilite .nt,
+.codehilite .nv,
+.highlight .n,
+.highlight .na,
+.highlight .nb,
+.highlight .nc,
+.highlight .nn,
+.highlight .nt,
+.highlight .nv {
+  color:var(--hljs-builtin)
+}
+
+.hljs-meta {
+  color:var(--hljs-meta)
+}
+
+.hljs-meta .hljs-string {
+  color:var(--hljs-meta-string)
+}
+
+.hljs-emphasis {
+  font-style:italic
+}
+
+.hljs-strong {
+  font-weight:700
+}

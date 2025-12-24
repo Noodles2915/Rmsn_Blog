@@ -26,6 +26,7 @@ urlpatterns = [
     path('user/', include(('users.urls', 'users'), namespace='users')),
     path('post/', include(('posting.urls', 'posting'), namespace='posting')),
     path('socials/', include(('socials.urls', 'socials'), namespace='socials')),
+    path('all/', views.all_posts, name='all_posts'),
     path('', views.index, name='index'),
 ]
 

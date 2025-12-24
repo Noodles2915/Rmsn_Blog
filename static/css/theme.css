@@ -6,7 +6,7 @@ html, body {
 }
 
 /* 强制全站使用微软雅黑（覆盖其他局部 font-family，包括 code/monospace） */
-,
+
 *::before,
 *::after {
     font-family: "Microsoft YaHei", "微软雅黑", "Microsoft YaHei UI", Arial, sans-serif;
@@ -307,17 +307,26 @@ pre code {
     white-space: pre;
 }
 
+/* Dark theme: use darker background for code blocks */
+[data-theme="dark"] pre,
+[data-theme="dark"] pre code {
+    background: rgba(255,255,255,0.02);
+    border-color: rgba(255,255,255,0.04);
+}
+
 /* Pygments output wrapper (server-side highlighted) */
 .codehilite {
     background: var(--hover-bg);
-    color: var(--text);
     border: 1px solid var(--border);
     padding: 12px;
     border-radius: 8px;
     overflow: auto;
 }
-.codehilite pre { background: transparent; margin: 0; padding: 0; }
+.codehilite pre { background: transparent; margin: 0; padding: 0; color: inherit; }
 .codehilite .highlight { background: transparent; }
+
+/* Allow token colors within codehilite to show (don't force color on all children) */
+.codehilite span { color: inherit; }
 
 /* Dark theme adjustments for highlighted code */
 [data-theme="dark"] .codehilite {

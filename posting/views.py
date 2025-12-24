@@ -398,16 +398,25 @@ def search_posts(request):
         
         # 预处理数据
         for p in page_obj:
-            excerpt = Truncator(strip_tags(p.content)).chars(140)
+            # 移除代码块后再生成摘要
+            import re
+            clean_content = re.sub(r'<pre[^>]*>.*?</pre>', ' ', p.content)
+            clean_content = re.sub(r'\s+', ' ', strip_tags(clean_content)).strip()
+            excerpt = Truncator(clean_content).chars(140)
+            
+            # 获取作者头像 URL
+            author_avatar = p.author.avatar.url if p.author.avatar else None
+            
             posts.append({
                 'id': p.id,
                 'title': p.title,
                 'url': reverse('posting:view_post', args=[p.id]),
                 'author': p.author.username,
                 'author_username': p.author.username,
+                'author_avatar': author_avatar,
                 'created_at': p.created_at,
                 'excerpt': excerpt,
-                'tags': list(p.tags.values_list('name', flat=True)),
+                'tags': [{'name': tag.name, 'url': reverse('posting:search_posts') + f'?q=%23{tag.name}'} for tag in p.tags.all()],
             })
     
     context = {
