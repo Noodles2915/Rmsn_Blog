@@ -398,10 +398,24 @@ def search_posts(request):
         
         # 预处理数据
         for p in page_obj:
-            # 移除代码块后再生成摘要
+            # 生成摘要：优先使用已渲染的 HTML（p.content），若为空或看起来不是 HTML，则回退渲染 p.content_raw
             import re
-            clean_content = re.sub(r'<pre[^>]*>.*?</pre>', ' ', p.content)
-            clean_content = re.sub(r'\s+', ' ', strip_tags(clean_content)).strip()
+            content_source = p.content or ''
+            if not content_source or '<' not in content_source:
+                # 如果没有已渲染的 HTML，则把可用的原始 Markdown（优先 content_raw，回退为 p.content）渲染为 HTML
+                raw_fallback = getattr(p, 'content_raw', '') or p.content or ''
+                if raw_fallback:
+                    content_source = markdownify(raw_fallback)
+                else:
+                    content_source = p.content or ''
+
+            # 额外清理：如果有 Markdown 围栏代码（```...``` 或 ~~~...~~~），先移除它们
+            content_source = re.sub(r'```.*?```', ' ', content_source, flags=re.DOTALL)
+            content_source = re.sub(r'~~~.*?~~~', ' ', content_source, flags=re.DOTALL)
+
+            # 移除代码块（<pre>）再生成纯文本摘要
+            clean_no_pre = re.sub(r'<pre[^>]*>.*?</pre>', ' ', content_source, flags=re.DOTALL)
+            clean_content = re.sub(r'\s+', ' ', strip_tags(clean_no_pre)).strip()
             excerpt = Truncator(clean_content).chars(140)
             
             # 获取作者头像 URL

@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from users.views import get_current_user
 from posting.models import Post
+from markdownx.utils import markdownify
 from django.utils.html import strip_tags
 from django.utils.text import Truncator
 from django.urls import reverse
@@ -15,10 +16,20 @@ def index(request):
     posts = []
     for p in qs:
         import re
-        # 移除代码块（<pre> 和 <code>）
-        content_no_code = re.sub(r'<pre[^>]*>.*?</pre>', ' ', p.content, flags=re.DOTALL)
+        # 优先使用已渲染的 HTML（p.content），若为空或看起来不是 HTML，则回退渲染可用的原始 Markdown（content_raw 或 p.content）
+        content_source = p.content or ''
+        if not content_source or '<' not in content_source:
+            raw_fallback = getattr(p, 'content_raw', '') or p.content or ''
+            if raw_fallback:
+                content_source = markdownify(raw_fallback)
+            else:
+                content_source = p.content or ''
+
+        # 额外清理：移除 Markdown 围栏代码（```...``` 或 ~~~...~~~），然后移除 HTML 的 <pre>/<code>
+        content_source = re.sub(r'```.*?```', ' ', content_source, flags=re.DOTALL)
+        content_source = re.sub(r'~~~.*?~~~', ' ', content_source, flags=re.DOTALL)
+        content_no_code = re.sub(r'<pre[^>]*>.*?</pre>', ' ', content_source, flags=re.DOTALL)
         content_no_code = re.sub(r'<code[^>]*>.*?</code>', ' ', content_no_code, flags=re.DOTALL)
-        # 去掉剩余HTML标签并清理多余空白
         clean_content = strip_tags(content_no_code)
         clean_content = re.sub(r'\s+', ' ', clean_content).strip()
         excerpt = Truncator(clean_content).chars(200)
@@ -59,10 +70,18 @@ def all_posts(request):
     posts = []
     for p in page_obj:
         import re
-        # 移除代码块（<pre> 和 <code>）
-        content_no_code = re.sub(r'<pre[^>]*>.*?</pre>', ' ', p.content, flags=re.DOTALL)
+        # 优先使用已渲染的 HTML（p.content），若为空或看起来不是 HTML，则回退渲染可用的原始 Markdown（content_raw 或 p.content）
+        content_source = p.content or ''
+        if not content_source or '<' not in content_source:
+            raw_fallback = getattr(p, 'content_raw', '') or p.content or ''
+            if raw_fallback:
+                content_source = markdownify(raw_fallback)
+            else:
+                content_source = p.content or ''
+
+        # 移除代码块（<pre> 和 <code>）并清理标签与空白，生成摘要
+        content_no_code = re.sub(r'<pre[^>]*>.*?</pre>', ' ', content_source, flags=re.DOTALL)
         content_no_code = re.sub(r'<code[^>]*>.*?</code>', ' ', content_no_code, flags=re.DOTALL)
-        # 去掉剩余HTML标签并清理多余空白
         clean_content = strip_tags(content_no_code)
         clean_content = re.sub(r'\s+', ' ', clean_content).strip()
         excerpt = Truncator(clean_content).chars(200)
