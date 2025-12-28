@@ -83,6 +83,8 @@ class LoginForm(Form):
     password = CharField(label="密码",widget=PasswordInput, required=True)
 
 class ProfileEditForm(forms.ModelForm):
+    # 允许不提交 theme（前端有独立的客户端主题控制），避免表单因为缺少该字段而整体验证失败
+    theme = forms.ChoiceField(choices=User.THEME_CHOICES, required=False, widget=forms.Select(attrs={'class': 'form-control'}))
     class Meta:
         model = User
         fields = ['email', 'avatar', 'bg', 'bio', 'theme']
