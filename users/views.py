@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
-from .models import User, UserSession
+from .models import User, UserSession, PasswordResetToken
 from django.http import JsonResponse, HttpResponse
-from .forms import RegistrationForm, LoginForm, ProfileEditForm
+from .forms import RegistrationForm, LoginForm, ProfileEditForm, RequestPasswordResetForm, PasswordResetForm
 from utils.email import send_verification_email
 from django.views.decorators.http import require_POST
 from django.core.validators import validate_email
@@ -357,3 +357,148 @@ def get_theme(request):
         return JsonResponse({'theme': 'auto'})
     
     return JsonResponse({'theme': user.theme})
+
+
+def request_password_reset(request):
+    """请求密码重置（发送验证码）"""
+    if request.method == 'POST':
+        form = RequestPasswordResetForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            
+            # 生成验证码并保存到数据库
+            code = PasswordResetToken.create_code(email)
+            
+            # 发送验证码邮件
+            try:
+                from django.core.mail import send_mail
+                from django.conf import settings
+                
+                subject = '密码重置验证码 - RmsnBlog'
+                message = f'您的密码重置验证码为: {code}，有效期 10 分钟。'
+                from_email = settings.EMAIL_HOST_USER
+                
+                send_mail(subject, message, from_email, [email], fail_silently=False)
+                
+                # 将邮箱保存到 session 中
+                request.session['password_reset_email'] = email
+                
+                # 跳转到重置密码页面
+                return redirect('users:reset_password')
+            except Exception as e:
+                form.add_error(None, f'发送验证码失败: {str(e)}')
+    else:
+        form = RequestPasswordResetForm()
+    
+    return render(request, 'request_password_reset.html', {'form': form})
+
+
+def reset_password(request):
+    """重置密码（验证验证码并设置新密码）"""
+    # 从 session 获取邮箱
+    email = request.session.get('password_reset_email')
+    
+    # 如果 session 中没有邮箱，重定向到请求重置页面
+    if not email:
+        return redirect('users:request_password_reset')
+    
+    if request.method == 'POST':
+        form = PasswordResetForm(request.POST)
+        if form.is_valid():
+            code = form.cleaned_data['verification_code']
+            new_password = form.cleaned_data['password']
+            
+            # 再次验证验证码并标记为已使用
+            try:
+                token = PasswordResetToken.objects.filter(
+                    email=email,
+                    code=code,
+                    is_used=False
+                ).latest('created_at')
+                
+                if not token.is_valid():
+                    form.add_error('verification_code', '验证码已过期')
+                else:
+                    # 标记验证码为已使用
+                    token.is_used = True
+                    token.save()
+                    
+                    # 更新用户密码
+                    user = User.objects.get(email=email)
+                    user.password_encrypt(new_password)
+                    user.save()
+                    
+                    # 删除该用户的所有会话（强制重新登录）
+                    UserSession.objects.filter(user=user).delete()
+                    
+                    # 清除 session 中的邮箱
+                    del request.session['password_reset_email']
+                    
+                    # 重定向到登录页面
+                    return redirect('users:login')
+            except PasswordResetToken.DoesNotExist:
+                form.add_error('verification_code', '验证码不正确或已过期')
+            except User.DoesNotExist:
+                form.add_error(None, '用户不存在')
+    else:
+        form = PasswordResetForm()
+    
+    return render(request, 'reset_password.html', {'form': form, 'email': email})
+
+
+@require_POST
+def send_reset_code(request):
+    """发送密码重置验证码的 AJAX 接口"""
+    email = request.POST.get('email', '').strip()
+    
+    if not email:
+        return JsonResponse({'ok': False, 'error': '邮箱不能为空'})
+    
+    # 验证邮箱格式
+    try:
+        validate_email(email)
+    except ValidationError:
+        return JsonResponse({'ok': False, 'error': '邮箱格式不正确'})
+    
+    # 检查邮箱是否注册
+    if not User.objects.filter(email=email).exists():
+        return JsonResponse({'ok': False, 'error': '该邮箱未注册'})
+    
+    # 速率限制检查
+    ip = request.META.get('REMOTE_ADDR', 'unknown')
+    rate_key = f'reset_code_rate_{ip}_{email}'
+    
+    try:
+        last_send = cache.get(rate_key)
+    except Exception:
+        last_send = _IP_RATE_MAP.get(rate_key)
+    
+    now = int(time.time())
+    if last_send and (now - last_send) < 60:
+        return JsonResponse({
+            'ok': False,
+            'error': f'请求过于频繁，请 {60 - (now - last_send)} 秒后再试'
+        })
+    
+    # 生成并发送验证码
+    try:
+        code = PasswordResetToken.create_code(email)
+        
+        from django.core.mail import send_mail
+        from django.conf import settings
+        
+        subject = '密码重置验证码 - RmsnBlog'
+        message = f'您的密码重置验证码为: {code}，有效期 10 分钟。'
+        from_email = settings.EMAIL_HOST_USER
+        
+        send_mail(subject, message, from_email, [email], fail_silently=False)
+        
+        # 记录发送时间
+        try:
+            cache.set(rate_key, now, 60)
+        except Exception:
+            _IP_RATE_MAP[rate_key] = now
+        
+        return JsonResponse({'ok': True, 'message': '验证码已发送'})
+    except Exception as e:
+        return JsonResponse({'ok': False, 'error': f'发送失败: {str(e)}'})

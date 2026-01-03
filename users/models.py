@@ -71,3 +71,33 @@ class UserSession(models.Model):
     
     def is_valid(self) -> bool:
         return self.is_active and (self.created_at + timedelta(days=7) > timezone.now())
+
+
+class PasswordResetToken(models.Model):
+    """密码重置验证码模型"""
+    email = models.EmailField()
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+    
+    def is_valid(self) -> bool:
+        """检查验证码是否仍然有效（10分钟内且未使用）"""
+        return not self.is_used and (self.created_at + timedelta(minutes=10) > timezone.now())
+    
+    @staticmethod
+    def create_code(email: str) -> str:
+        """为指定邮箱创建验证码"""
+        # 生成6位数验证码
+        from random import randint
+        code = f"{randint(0, 999999):06d}"
+        
+        # 删除该邮箱之前的未使用验证码
+        PasswordResetToken.objects.filter(email=email, is_used=False).delete()
+        
+        # 创建新的验证码记录
+        token = PasswordResetToken(email=email, code=code)
+        token.save()
+        return code
+    
+    def __str__(self):
+        return f"{self.email} - {self.code}"

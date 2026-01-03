@@ -16,4 +16,7 @@ urlpatterns = [
     path('profile/<str:username>/', views.profile, name='profile_user'),
     path('api/user/theme/', views.set_theme, name='set_theme'),
     path('api/theme/', views.get_theme, name='get_theme'),
+    path('password/request-reset/', views.request_password_reset, name='request_password_reset'),
+    path('password/reset/', views.reset_password, name='reset_password'),
+    path('password/send-reset-code/', views.send_reset_code, name='send_reset_code'),
 ]

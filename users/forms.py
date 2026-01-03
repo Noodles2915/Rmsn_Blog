@@ -82,6 +82,34 @@ class LoginForm(Form):
     username = CharField(label="用户名",max_length=150, required=True)
     password = CharField(label="密码",widget=PasswordInput, required=True)
 
+
+class RequestPasswordResetForm(Form):
+    """请求密码重置表单（第一步：输入邮箱获取验证码）"""
+    email = EmailField(label="邮箱", required=True)
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email and not User.objects.filter(email=email).exists():
+            raise forms.ValidationError('该邮箱未注册')
+        return email
+
+
+class PasswordResetForm(Form):
+    """密码重置表单（第二步：验证码+新密码）"""
+    verification_code = CharField(label="验证码", max_length=6, required=True)
+    password = CharField(label="新密码", widget=PasswordInput, required=True)
+    confirm_password = CharField(label="确认新密码", widget=PasswordInput, required=True)
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        confirm_password = cleaned_data.get("confirm_password")
+        
+        if password != confirm_password:
+            self.add_error('confirm_password', "两次输入的密码不匹配")
+        return cleaned_data
+
+
 class ProfileEditForm(forms.ModelForm):
     # 允许不提交 theme（前端有独立的客户端主题控制），避免表单因为缺少该字段而整体验证失败
     theme = forms.ChoiceField(choices=User.THEME_CHOICES, required=False, widget=forms.Select(attrs={'class': 'form-control'}))
